@@ -1,6 +1,6 @@
-package co.com.crediya.model.user;
+package co.com.crediya.model.loanrequest;
+
 import lombok.*;
-//import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -9,9 +9,10 @@ import java.time.LocalDate;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder(toBuilder = true)
+@Builder
 public class User {
     private Long id;
+    private String document_number;
     private String first_name;
     private String last_name;
     private LocalDate birth_date;

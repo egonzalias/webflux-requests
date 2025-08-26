@@ -1,7 +1,5 @@
 package co.com.crediya.r2dbc.entity;
 
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,23 +9,25 @@ import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
-@Table("users")
+@Table("loan_requests")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserEntity {
+public class LoanRequestEntity {
     @Id
     private Long id;
     @Column("document_number")
     private String documentNumber;
-    private String first_name;
-    private String last_name;
-    private LocalDate birth_date;
-    private String address;
-    private String phone;
-    private String email;
-    private BigDecimal base_salary;
+    private BigDecimal amount;
+    @Column("term_months")
+    private Integer termInMonths;
+    @Column("loan_type_id")
+    private Long loanType;
+    @Column("status_id")
+    private Long status;
+    @Column("created_at")
+    private LocalDateTime createdAt;
 }

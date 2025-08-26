@@ -1,46 +1,35 @@
 package co.com.crediya.r2dbc;
 
-import co.com.crediya.model.user.User;
-import co.com.crediya.model.user.gateways.UserRepository;
-import co.com.crediya.r2dbc.entity.UserEntity;
+import co.com.crediya.model.loanrequest.LoanRequest;
+import co.com.crediya.model.loanrequest.gateways.LoanRequestRepository;
+import co.com.crediya.r2dbc.entity.LoanRequestEntity;
 import co.com.crediya.r2dbc.helper.ReactiveAdapterOperations;
-import lombok.RequiredArgsConstructor;
 import org.reactivecommons.utils.ObjectMapper;
-import org.springframework.data.r2dbc.repository.Query;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.reactive.TransactionalOperator;
 import reactor.core.publisher.Mono;
 
 @Repository
 public class MyReactiveRepositoryAdapter extends ReactiveAdapterOperations<
-    User, UserEntity, String, MyReactiveRepository
-> implements UserRepository {
+        LoanRequest, LoanRequestEntity, String, MyReactiveRepository
+> implements LoanRequestRepository {
 
     private final TransactionalOperator transactionalOperator;
+    private final ObjectMapper mapper;
 
     public MyReactiveRepositoryAdapter(MyReactiveRepository repository, ObjectMapper mapper, TransactionalOperator transactionalOperator) {
-        /**
-         *  Could be use mapper.mapBuilder if your domain model implement builder pattern
-         *  super(repository, mapper, d -> mapper.mapBuilder(d,ObjectModel.ObjectModelBuilder.class).build());
-         *  Or using mapper.map with the class of the object model
-         */
-        super(repository, mapper, d -> mapper.map(d, User.class/* change for domain model */));
+        super(repository, mapper, d -> mapper.map(d, LoanRequest.class/* change for domain model */));
         this.transactionalOperator = transactionalOperator;
+        this.mapper = mapper;
     }
 
     @Override
-    public Mono<Void> registerUser(User user) {
-        UserEntity entity = mapper.map(user, UserEntity.class);
+    public Mono<Void> loanRequest(LoanRequest loanRequest) {
+        LoanRequestEntity entity = mapper.map(loanRequest, LoanRequestEntity.class);
+        entity.setStatus(loanRequest.getLoanStatus().getId());
+        entity.setLoanType(loanRequest.getLoanTypeCode().getId());
+        entity.setDocumentNumber(loanRequest.getDocumentNumber());
         return transactionalOperator.execute(tx -> repository.save(entity).then()).then();
     }
 
-    @Override
-    public Mono<Boolean> findByEmail(String email) {
-        return repository.existsByEmail(email);
-    }
-
-    @Override
-    public String getTest() {
-        return repository.getTesting();
-    }
 }

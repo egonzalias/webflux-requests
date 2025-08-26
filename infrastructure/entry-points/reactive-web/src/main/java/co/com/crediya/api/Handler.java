@@ -1,10 +1,10 @@
 package co.com.crediya.api;
 
 
-import co.com.crediya.api.dto.UserDTO;
+import co.com.crediya.api.dto.LoanRequestCreateDTO;
+import co.com.crediya.api.mapper.LoanRequestDTOMapper;
 import co.com.crediya.model.exception.ValidationException;
-import co.com.crediya.api.mapper.UserDTOMapper;
-import co.com.crediya.usecase.user.UserUseCase;
+import co.com.crediya.usecase.user.LoanRequestUseCase;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
@@ -23,26 +23,22 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class Handler {
 
-    private final UserUseCase userUseCase;
-    private final UserDTOMapper userDTOMapper;
+    private final LoanRequestUseCase loanRequestUseCase;
+    private final LoanRequestDTOMapper loanRequestDTOMapper;
     private final Validator validator;
 
-    public Mono<ServerResponse> listenGETOtherUseCase(ServerRequest serverRequest) {
-        return ServerResponse.ok().bodyValue(userUseCase.test());
-    }
-
-    public Mono<ServerResponse> registerUser(ServerRequest serverRequest) {
+    public Mono<ServerResponse> loanRequest(ServerRequest serverRequest) {
         return serverRequest
-                .bodyToMono(UserDTO.class)
+                .bodyToMono(LoanRequestCreateDTO.class)
                 .doOnNext(this::validate)
-                .map(userDTOMapper::toModel)
-                .flatMap(userUseCase::registerUser)
+                .map(loanRequestDTOMapper::toModel)
+                .flatMap(loanRequestUseCase::loanRequest)
                 .then(ServerResponse.status(HttpStatus.CREATED).build());
     }
 
-    private void validate(UserDTO userDTO) {
-        BindingResult errors = new BeanPropertyBindingResult(userDTO, UserDTO.class.getName());
-        validator.validate(userDTO, errors);
+    private void validate(LoanRequestCreateDTO loanRequestCreateDTO) {
+        BindingResult errors = new BeanPropertyBindingResult(loanRequestCreateDTO, LoanRequestCreateDTO.class.getName());
+        validator.validate(loanRequestCreateDTO, errors);
         if (errors.hasErrors()) {
             List<String> messages = errors.getAllErrors()
                     .stream()

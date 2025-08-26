@@ -8,6 +8,7 @@ import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 import reactor.core.publisher.Mono;
 
 // TODO: This file is just an example, you should delete or modify it
-public interface MyReactiveRepository extends ReactiveCrudRepository<LoanRequestEntity, String>, ReactiveQueryByExampleExecutor<LoanRequestEntity> {
-
+public interface UserReactiveRepository extends ReactiveCrudRepository<UserEntity, String>, ReactiveQueryByExampleExecutor<UserEntity> {
+    @Query("SELECT * FROM users WHERE document_number = :documentNumber")
+    Mono<Boolean> findByDocumentNumber(String documentNumber);
 }
