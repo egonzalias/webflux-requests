@@ -24,14 +24,14 @@ public class LoanTypeCache {
     public void preloadCache() {
         repository.findAll()
                 .map(mapper::toModel)
-                .doOnNext(status -> cache.put(status.getCode(), status))
+                .doOnNext(status -> cache.put(status.getName(), status))
                 .subscribe();
     }
 
-    public Mono<LoanType> findByCode(String code) {
+    public Mono<LoanType> findByName(String code) {
         LoanType cached = cache.get(code);
         if (cached != null) return Mono.just(cached);
-        return repository.findByCode(code)
+        return repository.findByName(code)
                 .map(mapper::toModel)
                 .doOnNext(status -> cache.put(code, status));
     }

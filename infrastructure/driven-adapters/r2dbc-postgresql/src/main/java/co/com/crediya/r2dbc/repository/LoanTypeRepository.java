@@ -1,6 +1,5 @@
 package co.com.crediya.r2dbc.repository;
 
-import co.com.crediya.r2dbc.entity.LoanStatusEntity;
 import co.com.crediya.r2dbc.entity.LoanTypeEntity;
 import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 import org.springframework.stereotype.Repository;
@@ -8,5 +7,5 @@ import reactor.core.publisher.Mono;
 
 @Repository
 public interface LoanTypeRepository extends ReactiveCrudRepository<LoanTypeEntity, Long> {
-    Mono<LoanTypeEntity> findByCode(String code);
+    Mono<LoanTypeEntity> findByName(String code);
 }

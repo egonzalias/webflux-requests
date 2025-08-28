@@ -1,7 +1,8 @@
-package co.com.crediya.r2dbc;
+package co.com.crediya.r2dbc.adapter.impl;
 
 import co.com.crediya.model.loanrequest.LoanRequest;
 import co.com.crediya.model.loanrequest.gateways.LoanRequestRepository;
+import co.com.crediya.r2dbc.adapter.RequestReactiveRepository;
 import co.com.crediya.r2dbc.entity.LoanRequestEntity;
 import co.com.crediya.r2dbc.helper.ReactiveAdapterOperations;
 import org.reactivecommons.utils.ObjectMapper;
@@ -11,13 +12,13 @@ import reactor.core.publisher.Mono;
 
 @Repository
 public class MyReactiveRepositoryAdapter extends ReactiveAdapterOperations<
-        LoanRequest, LoanRequestEntity, String, MyReactiveRepository
+        LoanRequest, LoanRequestEntity, String, RequestReactiveRepository
 > implements LoanRequestRepository {
 
     private final TransactionalOperator transactionalOperator;
     private final ObjectMapper mapper;
 
-    public MyReactiveRepositoryAdapter(MyReactiveRepository repository, ObjectMapper mapper, TransactionalOperator transactionalOperator) {
+    public MyReactiveRepositoryAdapter(RequestReactiveRepository repository, ObjectMapper mapper, TransactionalOperator transactionalOperator) {
         super(repository, mapper, d -> mapper.map(d, LoanRequest.class/* change for domain model */));
         this.transactionalOperator = transactionalOperator;
         this.mapper = mapper;

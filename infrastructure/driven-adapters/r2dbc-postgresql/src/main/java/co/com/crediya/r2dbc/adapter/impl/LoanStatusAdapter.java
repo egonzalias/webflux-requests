@@ -1,4 +1,4 @@
-package co.com.crediya.r2dbc;
+package co.com.crediya.r2dbc.adapter.impl;
 
 import co.com.crediya.model.loanrequest.LoanStatus;
 import co.com.crediya.model.loanrequest.gateways.LoanStatusRepository;

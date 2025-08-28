@@ -29,7 +29,7 @@ public interface LoanRequestDTOMapper {
             return null;
         }
         LoanType loanType = new LoanType();
-        loanType.setCode(code);
+        loanType.setName(code);
         return loanType;
     }
 
@@ -37,6 +37,6 @@ public interface LoanRequestDTOMapper {
         if (loanType == null) {
             return null;
         }
-        return loanType.getCode();
+        return loanType.getName();
     }
 }

@@ -9,6 +9,6 @@ import lombok.*;
 @Builder
 public class LoanType {
     private Long id;
-    private String code;
+    private String name;
     private String description;
 }

@@ -4,7 +4,6 @@ import co.com.crediya.model.exception.ValidationException;
 import co.com.crediya.model.loanrequest.LoanRequest;
 import co.com.crediya.model.loanrequest.LoanStatus;
 import co.com.crediya.model.loanrequest.LoanType;
-import co.com.crediya.model.loanrequest.User;
 import co.com.crediya.model.loanrequest.gateways.LoanRequestRepository;
 import co.com.crediya.model.loanrequest.gateways.LoanStatusRepository;
 import co.com.crediya.model.loanrequest.gateways.LoanTypeRepository;
@@ -29,8 +28,8 @@ public class LoanRequestUseCase {
         Mono<LoanStatus> statusMono = loanStatusRepository.findStatusByCode("PEND")
                 .switchIfEmpty(Mono.error(new ValidationException(List.of("El estado 'PEND' es incorrecto o no existe en la base de datos."))));
 
-        Mono<LoanType> loanTypeMono = loanTypeRepository.findByCode(loanRequest.getLoanTypeCode().getCode())
-                .switchIfEmpty(Mono.error(new ValidationException(List.of("El tipo de préstamo '"+loanRequest.getLoanTypeCode().getCode()+"' es incorrecto o no existe en la base de datos."))));
+        Mono<LoanType> loanTypeMono = loanTypeRepository.findByCode(loanRequest.getLoanTypeCode().getName())
+                .switchIfEmpty(Mono.error(new ValidationException(List.of("El tipo de préstamo '"+loanRequest.getLoanTypeCode().getName()+"' es incorrecto o no existe en la base de datos."))));
 
         /*Mono<User> userMono = userRepository.findByDocumentNumber(loanRequest.getDocumentNumber())
                 .switchIfEmpty(Mono.error(new ValidationException(List.of("El Usuario debe estar registrado previamente para poder crear la solicitud de prestamo"))));*/

@@ -1,5 +1,7 @@
 package co.com.crediya.r2dbc;
 
+import co.com.crediya.r2dbc.adapter.RequestReactiveRepository;
+import co.com.crediya.r2dbc.adapter.impl.MyReactiveRepositoryAdapter;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -15,14 +17,14 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class MyReactiveRepositoryAdapterTest {
+class RequestReactiveRepositoryAdapterTest {
     // TODO: change four you own tests
 
     @InjectMocks
     MyReactiveRepositoryAdapter repositoryAdapter;
 
     @Mock
-    MyReactiveRepository repository;
+    RequestReactiveRepository repository;
 
     @Mock
     ObjectMapper mapper;
