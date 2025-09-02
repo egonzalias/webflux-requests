@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: 8081
 spring:
   application:
     name: "requests"
@@ -29,3 +29,6 @@ management:
         enabled: true
 cors:
   allowed-origins: "http://localhost:4200,http://localhost:8080"
+jwt:
+  secret: cHJhZ21hLmNyZWRpeWEuZWdvbnphbGlhcy5ib290Y2FtcC4yMDI1
+  expiration: 3600000

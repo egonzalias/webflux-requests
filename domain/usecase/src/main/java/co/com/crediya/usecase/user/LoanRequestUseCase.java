@@ -4,10 +4,7 @@ import co.com.crediya.model.exception.ValidationException;
 import co.com.crediya.model.loanrequest.LoanRequest;
 import co.com.crediya.model.loanrequest.LoanStatus;
 import co.com.crediya.model.loanrequest.LoanType;
-import co.com.crediya.model.loanrequest.gateways.LoanRequestRepository;
-import co.com.crediya.model.loanrequest.gateways.LoanStatusRepository;
-import co.com.crediya.model.loanrequest.gateways.LoanTypeRepository;
-import co.com.crediya.model.loanrequest.gateways.UserRepository;
+import co.com.crediya.model.loanrequest.gateways.*;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
 
@@ -20,21 +17,13 @@ public class LoanRequestUseCase {
     private final LoanRequestRepository repository;
     private final LoanStatusRepository loanStatusRepository;
     private final LoanTypeRepository loanTypeRepository;
-    private final UserRepository userRepository;
+    private final LoggerService logger;
 
     public Mono<Void> loanRequest(LoanRequest loanRequest){
         loanRequest.setCreatedAt(LocalDateTime.now());
 
-        Mono<LoanStatus> statusMono = loanStatusRepository.findStatusByCode("PEND")
-                .switchIfEmpty(Mono.error(new ValidationException(List.of("El estado 'PEND' es incorrecto o no existe en la base de datos."))));
-
-        Mono<LoanType> loanTypeMono = loanTypeRepository.findByCode(loanRequest.getLoanTypeCode().getName())
-                .switchIfEmpty(Mono.error(new ValidationException(List.of("El tipo de préstamo '"+loanRequest.getLoanTypeCode().getName()+"' es incorrecto o no existe en la base de datos."))));
-
-        /*Mono<User> userMono = userRepository.findByDocumentNumber(loanRequest.getDocumentNumber())
-                .switchIfEmpty(Mono.error(new ValidationException(List.of("El Usuario debe estar registrado previamente para poder crear la solicitud de prestamo"))));*/
-
-        return Mono.zip(statusMono, loanTypeMono/*, userMono*/)
+        //Executes both Monos in parallel and combines their results when complete
+        return Mono.zip(getLoanStatus(), getLoanType(loanRequest))
                 .flatMap(tuple -> {
                     LoanStatus status = tuple.getT1();
                     LoanType loanType = tuple.getT2();
@@ -42,15 +31,30 @@ public class LoanRequestUseCase {
                     loanRequest.setLoanStatus(status);
                     loanRequest.setLoanTypeCode(loanType);
 
-                    //return repository.loanRequest(loanRequest);
-                    //see to implement to handle better the exception
+                    logger.info("Saving loan request for user: {} with type: {}",
+                            loanRequest.getDocumentNumber(),
+                            loanRequest.getLoanTypeCode().getName());
+
                     return repository.loanRequest(loanRequest).onErrorMap( throwable -> {
                         if(isForeignKeyViolation(throwable)){
                             return new ValidationException(List.of("El Usuario debe estar registrado previamente para poder crear la solicitud de prestamo."));
                         }
+                        logger.error("Unexpected error saving loan request", throwable);
                         return throwable;
                     });
                 });
+    }
+
+    private Mono<LoanStatus> getLoanStatus(){
+        return loanStatusRepository.findStatusByCode("PEND")
+                .doOnNext(status -> logger.debug("Loan status found: {}", status))
+                .switchIfEmpty(Mono.error(new ValidationException(List.of("El estado 'PEND' es incorrecto o no existe en la base de datos."))));
+    }
+
+    private Mono<LoanType> getLoanType(LoanRequest loanRequest){
+        return loanTypeRepository.findByCode(loanRequest.getLoanTypeCode().getName())
+                .doOnNext(type -> logger.debug("Loan type found: {}", type))
+                .switchIfEmpty(Mono.error(new ValidationException(List.of("El tipo de préstamo '"+loanRequest.getLoanTypeCode().getName()+"' es incorrecto o no existe en la base de datos."))));
     }
 
     private boolean isForeignKeyViolation(Throwable throwable) {
