@@ -41,7 +41,7 @@ public class MyReactiveRepositoryAdapter extends ReactiveAdapterOperations<
     }
 
     @Override
-    public Flux<LoanRequest> findByStatus(int codeStatus, int size, int offset) {
+    public Flux<LoanRequest> findByStatus(Long codeStatus, int size, int offset) {
         //Pageable pageable = PageRequest.of(page, offset);
         return repository.findByStatus(codeStatus, size, offset)
                 .doOnNext(entity -> System.out.println("Found EGR: " + entity)) // debug antes del map

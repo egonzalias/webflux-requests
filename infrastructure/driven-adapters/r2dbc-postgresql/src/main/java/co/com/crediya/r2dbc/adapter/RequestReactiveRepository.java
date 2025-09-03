@@ -32,7 +32,7 @@ public interface RequestReactiveRepository extends ReactiveCrudRepository<LoanRe
         WHERE lr.status_id = :status
         LIMIT :limit OFFSET :offset
    """)
-    Flux<LoanRequestExtendedDTO> findByStatus(@Param("status") Integer status,
+    Flux<LoanRequestExtendedDTO> findByStatus(@Param("status") Long status,
                                               @Param("limit") int limit,
                                               @Param("offset") int offset);
 }

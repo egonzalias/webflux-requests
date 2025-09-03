@@ -69,22 +69,20 @@ public class Handler {
         String pageStr = request.queryParam("page").orElse("0");
         String sizeStr = request.queryParam("size").orElse("10");
 
-        int status;
         int page;
         int size;
 
         try {
-            status = Integer.parseInt(statusStr);
             page = Integer.parseInt(pageStr);
             size = Integer.parseInt(sizeStr);
         } catch (NumberFormatException e) {
-            return Mono.error(new ValidationException(List.of("'status', 'page' y 'size' deben ser números enteros válidos")));
+            return Mono.error(new ValidationException(List.of("'page' y 'size' deben ser números enteros válidos")));
         }
 
-        if (page < 0 || size <= 0 || status <= 0) {
-            return Mono.error(new ValidationException(List.of("'page' debe ser >= 0 , 'size' > 0 y 'status' > 0")));
+        if (page < 0 || size <= 0 ) {
+            return Mono.error(new ValidationException(List.of("'page' debe ser >= 0 , 'size' > 0")));
         }
 
-        return Mono.just(new PaginationStatusParams(status, page, size));
+        return Mono.just(new PaginationStatusParams(statusStr, page, size));
     }
 }
