@@ -5,10 +5,14 @@ import co.com.crediya.model.loanrequest.gateways.LoanRequestRepository;
 import co.com.crediya.r2dbc.adapter.RequestReactiveRepository;
 import co.com.crediya.r2dbc.entity.LoanRequestEntity;
 import co.com.crediya.r2dbc.helper.ReactiveAdapterOperations;
+import co.com.crediya.r2dbc.mapper.LoanRequestMapper;
+import lombok.RequiredArgsConstructor;
 import org.reactivecommons.utils.ObjectMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.reactive.TransactionalOperator;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
 
 @Repository
 public class MyReactiveRepositoryAdapter extends ReactiveAdapterOperations<
@@ -17,11 +21,14 @@ public class MyReactiveRepositoryAdapter extends ReactiveAdapterOperations<
 
     private final TransactionalOperator transactionalOperator;
     private final ObjectMapper mapper;
+    private final LoanRequestMapper loanRequestMapper;
 
-    public MyReactiveRepositoryAdapter(RequestReactiveRepository repository, ObjectMapper mapper, TransactionalOperator transactionalOperator) {
+    public MyReactiveRepositoryAdapter(RequestReactiveRepository repository, ObjectMapper mapper,
+                                       TransactionalOperator transactionalOperator, LoanRequestMapper loanRequestMapper) {
         super(repository, mapper, d -> mapper.map(d, LoanRequest.class/* change for domain model */));
         this.transactionalOperator = transactionalOperator;
         this.mapper = mapper;
+        this.loanRequestMapper = loanRequestMapper;
     }
 
     @Override
@@ -31,6 +38,14 @@ public class MyReactiveRepositoryAdapter extends ReactiveAdapterOperations<
         entity.setLoanType(loanRequest.getLoanTypeCode().getId());
         entity.setDocumentNumber(loanRequest.getDocumentNumber());
         return transactionalOperator.execute(tx -> repository.save(entity).then()).then();
+    }
+
+    @Override
+    public Flux<LoanRequest> findByStatus(int codeStatus, int size, int offset) {
+        //Pageable pageable = PageRequest.of(page, offset);
+        return repository.findByStatus(codeStatus, size, offset)
+                .doOnNext(entity -> System.out.println("Found EGR: " + entity)) // debug antes del map
+                .map(loanRequestMapper::toDomain);
     }
 
 }

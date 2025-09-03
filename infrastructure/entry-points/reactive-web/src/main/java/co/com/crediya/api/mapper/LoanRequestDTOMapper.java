@@ -21,6 +21,9 @@ public interface LoanRequestDTOMapper {
     @Mapping(source = "loanTypeCode", target = "loanType")
     LoanRequestResponseDTO toResponse(LoanRequest loanRequest);
     @Mapping(source = "loanTypeCode", target = "loanTypeCode")
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "loanStatus", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
     LoanRequest toModel(LoanRequestCreateDTO loanRequestCreateDTO);
 
 

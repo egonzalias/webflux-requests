@@ -2,12 +2,15 @@ package co.com.crediya.api;
 
 
 import co.com.crediya.api.dto.LoanRequestCreateDTO;
+import co.com.crediya.api.dto.PaginationStatusParams;
 import co.com.crediya.api.mapper.LoanRequestDTOMapper;
 import co.com.crediya.model.exception.ValidationException;
+import co.com.crediya.usecase.user.GetLoanRequestUseCase;
 import co.com.crediya.usecase.user.LoanRequestUseCase;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindingResult;
@@ -24,6 +27,7 @@ import java.util.stream.Collectors;
 public class Handler {
 
     private final LoanRequestUseCase loanRequestUseCase;
+    private final GetLoanRequestUseCase getLoanRequestUseCase;
     private final LoanRequestDTOMapper loanRequestDTOMapper;
     private final Validator validator;
 
@@ -36,6 +40,18 @@ public class Handler {
                 .then(ServerResponse.status(HttpStatus.CREATED).build());
     }
 
+    public Mono<ServerResponse> getLoanRequestsByType(ServerRequest serverRequest) {
+        return validateQueryParams(serverRequest)
+                .flatMap(params ->
+                    getLoanRequestUseCase.getLoanRequestsByStatus(params.codeStatus(), params.page(), params.size() )
+                            .map(loanRequestDTOMapper::toResponse)
+                            .collectList()
+                            .flatMap(list -> ServerResponse.ok()
+                                    .contentType(MediaType.APPLICATION_JSON)
+                                    .bodyValue(list))
+                );
+    }
+
     private void validate(LoanRequestCreateDTO loanRequestCreateDTO) {
         BindingResult errors = new BeanPropertyBindingResult(loanRequestCreateDTO, LoanRequestCreateDTO.class.getName());
         validator.validate(loanRequestCreateDTO, errors);
@@ -46,5 +62,29 @@ public class Handler {
                     .collect(Collectors.toList());
             throw new ValidationException(messages);
         }
+    }
+
+    private Mono<PaginationStatusParams> validateQueryParams(ServerRequest request){
+        String statusStr = request.queryParam("status").orElse("0");
+        String pageStr = request.queryParam("page").orElse("0");
+        String sizeStr = request.queryParam("size").orElse("10");
+
+        int status;
+        int page;
+        int size;
+
+        try {
+            status = Integer.parseInt(statusStr);
+            page = Integer.parseInt(pageStr);
+            size = Integer.parseInt(sizeStr);
+        } catch (NumberFormatException e) {
+            return Mono.error(new ValidationException(List.of("'status', 'page' y 'size' deben ser números enteros válidos")));
+        }
+
+        if (page < 0 || size <= 0 || status <= 0) {
+            return Mono.error(new ValidationException(List.of("'page' debe ser >= 0 , 'size' > 0 y 'status' > 0")));
+        }
+
+        return Mono.just(new PaginationStatusParams(status, page, size));
     }
 }

@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder(toBuilder = true)
 public class LoanRequest {
+    private Long id;
     private String documentNumber;
     private BigDecimal amount;
     private Integer termInMonths;
