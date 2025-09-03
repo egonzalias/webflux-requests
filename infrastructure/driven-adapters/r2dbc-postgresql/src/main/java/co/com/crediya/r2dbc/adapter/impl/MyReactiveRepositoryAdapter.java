@@ -1,6 +1,7 @@
 package co.com.crediya.r2dbc.adapter.impl;
 
 import co.com.crediya.model.loanrequest.LoanRequest;
+import co.com.crediya.model.loanrequest.LoanRequestSummary;
 import co.com.crediya.model.loanrequest.gateways.LoanRequestRepository;
 import co.com.crediya.r2dbc.adapter.RequestReactiveRepository;
 import co.com.crediya.r2dbc.entity.LoanRequestEntity;
@@ -50,10 +51,10 @@ public class MyReactiveRepositoryAdapter extends ReactiveAdapterOperations<
     }
 
     @Override
-    public Flux<LoanRequest> findByStatusIn(List<Long> statusIds, int size, int offset) {
+    public Flux<LoanRequestSummary> findByStatusIn(List<Long> statusIds, int size, int offset) {
         return repository.findByStatuses(statusIds, size, offset)
                 .doOnNext(entity -> System.out.println("Found EGR: " + entity)) // debug antes del map
-                .map(loanRequestMapper::toDomain);
+                .map(loanRequestMapper::toDomainExtend);
     }
 
 }

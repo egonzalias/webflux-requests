@@ -28,5 +28,7 @@ public class LoanRequestExtendedDTO {
     private String status_code;
     private String status_description;
 
+    private BigDecimal approved_monthly_debt;
+
     private LocalDateTime created_at;
 }

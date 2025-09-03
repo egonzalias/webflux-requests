@@ -28,4 +28,5 @@ public class LoanRequestResponseDTO {
     private LoanType loanType;
     private LoanStatus loanStatus;
     private LocalDateTime createdAt;
+    private BigDecimal approvedMonthlyDebt;
 }

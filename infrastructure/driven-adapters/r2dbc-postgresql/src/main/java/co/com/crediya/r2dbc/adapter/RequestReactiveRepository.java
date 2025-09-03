@@ -56,7 +56,17 @@ public interface RequestReactiveRepository extends ReactiveCrudRepository<LoanRe
           ls.id AS status_id,
           ls.code AS status_code,
           ls.description AS status_description,
-          lr.created_at
+          lr.created_at,
+          COALESCE((
+               SELECT SUM(
+                   (approved.amount * (1 + approved_loan_type.interest_rate * approved.term_months)) / approved.term_months
+               )
+               FROM loan_requests approved
+               JOIN loan_types approved_loan_type ON approved.loan_type_id = approved_loan_type.id
+               JOIN loan_statuses approved_status ON approved.status_id = approved_status.id
+               WHERE approved.document_number = lr.document_number
+                 AND approved_status.code = 'APROB' 
+           ), 0) AS approved_monthly_debt
         FROM loan_requests lr
         JOIN loan_types lt ON lr.loan_type_id = lt.id
         JOIN loan_statuses ls ON lr.status_id = ls.id

@@ -3,6 +3,7 @@ package co.com.crediya.api.mapper;
 import co.com.crediya.api.dto.LoanRequestCreateDTO;
 import co.com.crediya.api.dto.LoanRequestResponseDTO;
 import co.com.crediya.model.loanrequest.LoanRequest;
+import co.com.crediya.model.loanrequest.LoanRequestSummary;
 import co.com.crediya.model.loanrequest.LoanType;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -19,7 +20,8 @@ import org.mapstruct.Mapping;
  */
 public interface LoanRequestDTOMapper {
     @Mapping(source = "loanTypeCode", target = "loanType")
-    LoanRequestResponseDTO toResponse(LoanRequest loanRequest);
+    @Mapping(source = "approved_monthly_debt", target = "approvedMonthlyDebt")
+    LoanRequestResponseDTO toResponse(LoanRequestSummary loanRequest);
 
     @Mapping(source = "loanTypeCode", target = "loanTypeCode")
     @Mapping(target = "id", ignore = true)
