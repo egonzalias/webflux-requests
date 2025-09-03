@@ -5,12 +5,17 @@ import co.com.crediya.api.dto.LoanRequestCreateDTO;
 import co.com.crediya.api.dto.PaginationStatusParams;
 import co.com.crediya.api.mapper.LoanRequestDTOMapper;
 import co.com.crediya.model.exception.ValidationException;
+import co.com.crediya.model.loanrequest.JwtUserInfo;
+import co.com.crediya.model.loanrequest.LoanRequest;
 import co.com.crediya.usecase.user.GetLoanRequestUseCase;
 import co.com.crediya.usecase.user.LoanRequestUseCase;
+import io.jsonwebtoken.Jws;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.context.ReactiveSecurityContextHolder;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindingResult;
@@ -32,12 +37,24 @@ public class Handler {
     private final Validator validator;
 
     public Mono<ServerResponse> loanRequest(ServerRequest serverRequest) {
-        return serverRequest
-                .bodyToMono(LoanRequestCreateDTO.class)
-                .doOnNext(this::validate)
-                .map(loanRequestDTOMapper::toModel)
-                .flatMap(loanRequestUseCase::loanRequest)
-                .then(ServerResponse.status(HttpStatus.CREATED).build());
+
+        Mono<LoanRequestCreateDTO> bodyMono = serverRequest.bodyToMono(LoanRequestCreateDTO.class);
+
+        return ReactiveSecurityContextHolder.getContext()
+                .map(SecurityContext::getAuthentication)
+                .map(auth -> (JwtUserInfo) auth.getDetails())
+                .flatMap(userInfo ->
+                        bodyMono.flatMap(dto -> {
+                            if (!dto.getDocumentNumber().equals(userInfo.getDocumentNumber())) {
+                                return Mono.error(new ValidationException(List.of("El cliente solo puede crear solicitudes para si mismo.")));
+                            }
+
+                            validate(dto);
+                            LoanRequest domainRequest = loanRequestDTOMapper.toModel(dto);
+
+                            return loanRequestUseCase.loanRequest(domainRequest).then(ServerResponse.status(HttpStatus.CREATED).build());
+                        })
+                );
     }
 
     public Mono<ServerResponse> getLoanRequestsByType(ServerRequest serverRequest) {
@@ -52,7 +69,7 @@ public class Handler {
                 );
     }
 
-    private void validate(LoanRequestCreateDTO loanRequestCreateDTO) {
+    private Mono<Void> validate(LoanRequestCreateDTO loanRequestCreateDTO) {
         BindingResult errors = new BeanPropertyBindingResult(loanRequestCreateDTO, LoanRequestCreateDTO.class.getName());
         validator.validate(loanRequestCreateDTO, errors);
         if (errors.hasErrors()) {
@@ -60,8 +77,9 @@ public class Handler {
                     .stream()
                     .map(DefaultMessageSourceResolvable::getDefaultMessage)
                     .collect(Collectors.toList());
-            throw new ValidationException(messages);
+            return Mono.error(new ValidationException(messages));
         }
+        return Mono.empty();
     }
 
     private Mono<PaginationStatusParams> validateQueryParams(ServerRequest request){

@@ -58,11 +58,12 @@ public class JwtAuthorizationFilter implements WebFilter {
             // Spring Security requires roles to be prefixed with "ROLE_"
             String role = "ROLE_" + userInfo.getRole();
 
-            Authentication authentication = new UsernamePasswordAuthenticationToken(
+            UsernamePasswordAuthenticationToken  authentication = new UsernamePasswordAuthenticationToken(
                     userInfo.getEmail(),
                     null,
                     List.of(new SimpleGrantedAuthority(role))
             );
+            authentication.setDetails(userInfo);
 
             //Wrap the authentication in a SecurityContext
             SecurityContext securityContext = new SecurityContextImpl(authentication);

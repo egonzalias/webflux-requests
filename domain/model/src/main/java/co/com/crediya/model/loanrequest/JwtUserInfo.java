@@ -12,5 +12,6 @@ import java.util.Date;
 public class JwtUserInfo {
     private String email;
     private String role;
+    private String documentNumber;
     private Date expiresAt;
 }
