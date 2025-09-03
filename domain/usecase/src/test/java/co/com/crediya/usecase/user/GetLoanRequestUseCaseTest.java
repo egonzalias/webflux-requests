@@ -8,13 +8,19 @@ import co.com.crediya.model.loanrequest.gateways.LoanStatusRepository;
 import co.com.crediya.model.loanrequest.gateways.LoanTypeRepository;
 import co.com.crediya.model.loanrequest.gateways.LoggerService;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
+
+import static reactor.core.publisher.Mono.when;
 
 @ExtendWith(MockitoExtension.class)
 public class GetLoanRequestUseCaseTest {
@@ -24,14 +30,14 @@ public class GetLoanRequestUseCaseTest {
     @Mock
     private LoanStatusRepository loanStatusRepository;
     @Mock
-    private LoanTypeRepository loanTypeRepository;
-    @Mock
     LoggerService loggerService;
 
     private LoanType loanType;
     private LoanStatus loanStatus;
     private LoanRequest loanRequest;
-    private LoanRequestUseCase loanRequestUseCase;
+    private GetLoanRequestUseCase getLoanRequestUseCase;
+    private int page;
+    private int size;
 
     @BeforeEach
     void setup(){
@@ -45,7 +51,9 @@ public class GetLoanRequestUseCaseTest {
                 loanStatus,
                 LocalDate.of(1995, 5, 20).atTime(LocalTime.now()));
 
-        loanRequestUseCase = new LoanRequestUseCase(repository, loanStatusRepository, loanTypeRepository, loggerService);
+        getLoanRequestUseCase = new GetLoanRequestUseCase(loanStatusRepository, repository, loggerService);
+        page = 0;
+        size = 10;
     }
 
 }

@@ -6,8 +6,10 @@ import co.com.crediya.r2dbc.repository.LoanTypeRepository;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -24,7 +26,7 @@ public class LoanTypeCache {
     public void preloadCache() {
         repository.findAll()
                 .map(mapper::toModel)
-                .doOnNext(status -> cache.put(status.getName(), status))
+                .doOnNext(type -> cache.put(type.getName(), type))
                 .subscribe();
     }
 
@@ -33,6 +35,6 @@ public class LoanTypeCache {
         if (cached != null) return Mono.just(cached);
         return repository.findByName(code)
                 .map(mapper::toModel)
-                .doOnNext(status -> cache.put(code, status));
+                .doOnNext(type -> cache.put(code, type));
     }
 }

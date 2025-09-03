@@ -60,7 +60,7 @@ public class Handler {
     public Mono<ServerResponse> getLoanRequestsByType(ServerRequest serverRequest) {
         return validateQueryParams(serverRequest)
                 .flatMap(params ->
-                    getLoanRequestUseCase.getLoanRequestsByStatus(params.codeStatus(), params.page(), params.size() )
+                    getLoanRequestUseCase.getLoanRequestsByStatus(params.codeStatuses(), params.page(), params.size() )
                             .map(loanRequestDTOMapper::toResponse)
                             .collectList()
                             .flatMap(list -> ServerResponse.ok()
@@ -83,6 +83,12 @@ public class Handler {
     }
 
     private Mono<PaginationStatusParams> validateQueryParams(ServerRequest request){
+
+        List<String> statuses = request.queryParams().getOrDefault("status", List.of());
+        if (statuses.isEmpty()) {
+            return Mono.error(new ValidationException(List.of("Debe enviar por lo menos un estado para generar el reporte")));
+        }
+
         String statusStr = request.queryParam("status").orElse("0");
         String pageStr = request.queryParam("page").orElse("0");
         String sizeStr = request.queryParam("size").orElse("10");
@@ -101,6 +107,6 @@ public class Handler {
             return Mono.error(new ValidationException(List.of("'page' debe ser >= 0 , 'size' > 0")));
         }
 
-        return Mono.just(new PaginationStatusParams(statusStr, page, size));
+        return Mono.just(new PaginationStatusParams(statuses, page, size));
     }
 }

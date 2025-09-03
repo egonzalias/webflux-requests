@@ -8,7 +8,7 @@ import org.springframework.data.repository.query.ReactiveQueryByExampleExecutor;
 import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 import reactor.core.publisher.Flux;
 
-
+import java.util.List;
 
 
 public interface RequestReactiveRepository extends ReactiveCrudRepository<LoanRequestEntity, String>, ReactiveQueryByExampleExecutor<LoanRequestEntity> {
@@ -22,6 +22,10 @@ public interface RequestReactiveRepository extends ReactiveCrudRepository<LoanRe
           lt.id as loan_type_id,
           lt.name as loan_type_name,
           lt.description as loan_type_description,
+          lt.minimum_amount as loan_type_minimum_amount,
+          lt.maximum_amount as loan_type_maximum_amount,
+          lt.interest_rate as loan_type_interest_rate,
+          lt.automatic_validation as loan_type_automatic_validation,
           ls.id AS status_id,
           ls.code AS status_code,
           ls.description AS status_description,
@@ -33,6 +37,33 @@ public interface RequestReactiveRepository extends ReactiveCrudRepository<LoanRe
         LIMIT :limit OFFSET :offset
    """)
     Flux<LoanRequestExtendedDTO> findByStatus(@Param("status") Long status,
+                                              @Param("limit") int limit,
+                                              @Param("offset") int offset);
+
+    @Query("""
+    SELECT
+          lr.id,
+          lr.document_number,
+          lr.amount,
+          lr.term_months,
+          lt.id as loan_type_id,
+          lt.name as loan_type_name,
+          lt.description as loan_type_description,
+          lt.minimum_amount as loan_type_minimum_amount,
+          lt.maximum_amount as loan_type_maximum_amount,
+          lt.interest_rate as loan_type_interest_rate,
+          lt.automatic_validation as loan_type_automatic_validation,
+          ls.id AS status_id,
+          ls.code AS status_code,
+          ls.description AS status_description,
+          lr.created_at
+        FROM loan_requests lr
+        JOIN loan_types lt ON lr.loan_type_id = lt.id
+        JOIN loan_statuses ls ON lr.status_id = ls.id
+        WHERE lr.status_id IN (:statuses)
+        LIMIT :limit OFFSET :offset
+   """)
+    Flux<LoanRequestExtendedDTO> findByStatuses(@Param("status") List<Long> statuses,
                                               @Param("limit") int limit,
                                               @Param("offset") int offset);
 }

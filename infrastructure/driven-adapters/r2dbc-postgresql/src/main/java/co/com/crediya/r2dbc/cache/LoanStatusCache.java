@@ -1,13 +1,16 @@
 package co.com.crediya.r2dbc.cache;
 
 import co.com.crediya.model.loanrequest.LoanStatus;
+import co.com.crediya.model.loanrequest.LoanType;
 import co.com.crediya.r2dbc.mapper.LoanStatusMapper;
 import co.com.crediya.r2dbc.repository.LoanStatusRepository;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -34,5 +37,10 @@ public class LoanStatusCache {
         return repository.findByCode(code)
                 .map(mapper::toModel)
                 .doOnNext(status -> cache.put(code, status));
+    }
+
+    public Flux<LoanStatus> findByCodes(List<String> codes) {
+        return Flux.fromIterable(codes)
+                .flatMap(this::findByCode);
     }
 }

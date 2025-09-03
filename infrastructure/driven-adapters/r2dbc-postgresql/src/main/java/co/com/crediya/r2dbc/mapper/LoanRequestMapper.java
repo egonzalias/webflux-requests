@@ -5,7 +5,6 @@ import co.com.crediya.model.loanrequest.LoanRequest;
 import co.com.crediya.model.loanrequest.LoanStatus;
 import co.com.crediya.model.loanrequest.LoanType;
 import co.com.crediya.r2dbc.dto.LoanRequestExtendedDTO;
-import co.com.crediya.r2dbc.entity.LoanRequestEntity;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
@@ -37,6 +36,10 @@ public interface LoanRequestMapper {
                         .id(dto.getLoan_type_id())
                         .name(dto.getLoan_type_name())
                         .description(dto.getLoan_type_description())
+                        .minimumAmount(dto.getLoan_type_minimum_amount())
+                        .maximumAmount(dto.getLoan_type_maximum_amount())
+                        .interestRate(dto.getLoan_type_interest_rate())
+                        .automaticValidation(dto.isLoan_type_automatic_validation())
                         .build();
         }
 

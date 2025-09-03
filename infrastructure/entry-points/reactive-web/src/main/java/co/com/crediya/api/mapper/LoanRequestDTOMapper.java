@@ -20,6 +20,7 @@ import org.mapstruct.Mapping;
 public interface LoanRequestDTOMapper {
     @Mapping(source = "loanTypeCode", target = "loanType")
     LoanRequestResponseDTO toResponse(LoanRequest loanRequest);
+
     @Mapping(source = "loanTypeCode", target = "loanTypeCode")
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "loanStatus", ignore = true)

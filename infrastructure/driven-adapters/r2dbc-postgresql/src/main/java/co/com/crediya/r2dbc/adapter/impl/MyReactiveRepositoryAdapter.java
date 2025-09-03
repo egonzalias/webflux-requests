@@ -13,6 +13,8 @@ import org.springframework.transaction.reactive.TransactionalOperator;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
+
 
 @Repository
 public class MyReactiveRepositoryAdapter extends ReactiveAdapterOperations<
@@ -43,7 +45,13 @@ public class MyReactiveRepositoryAdapter extends ReactiveAdapterOperations<
     @Override
     public Flux<LoanRequest> findByStatus(Long codeStatus, int size, int offset) {
         //Pageable pageable = PageRequest.of(page, offset);
-        return repository.findByStatus(codeStatus, size, offset)
+        return repository.findByStatus(codeStatus, size, offset)// debug antes del map
+                .map(loanRequestMapper::toDomain);
+    }
+
+    @Override
+    public Flux<LoanRequest> findByStatusIn(List<Long> statusIds, int size, int offset) {
+        return repository.findByStatuses(statusIds, size, offset)
                 .doOnNext(entity -> System.out.println("Found EGR: " + entity)) // debug antes del map
                 .map(loanRequestMapper::toDomain);
     }
