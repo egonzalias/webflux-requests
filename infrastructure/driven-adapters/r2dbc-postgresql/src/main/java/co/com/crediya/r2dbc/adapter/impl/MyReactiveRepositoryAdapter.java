@@ -58,7 +58,7 @@ public class MyReactiveRepositoryAdapter extends ReactiveAdapterOperations<
 
     @Override
     public Mono<Long> countLoanRequestByStatusIn(List<Long> statusIds) {
-        return repository.countLoanRequestsByStatusIn(statusIds);
+        return repository.countLoanRequestsByStatusIn(statusIds).defaultIfEmpty(0L);
     }
 
 }

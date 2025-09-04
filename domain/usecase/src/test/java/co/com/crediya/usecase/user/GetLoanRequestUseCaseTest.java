@@ -14,6 +14,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
 import java.math.BigDecimal;
@@ -22,6 +23,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
@@ -107,8 +109,18 @@ public class GetLoanRequestUseCaseTest {
         when(repository.findLoanRequestsByStatusIn(List.of(1L, 2L, 3L), 10, 0))
                 .thenReturn(Flux.fromIterable(expectedLoans));
 
+        when(repository.countLoanRequestByStatusIn(List.of(1L, 2L, 3L)))
+                .thenReturn(Mono.just(2L));
+
         StepVerifier.create(getLoanRequestUseCase.getLoanRequestsByStatus(statusCodes, 0, 10))
-                .expectNextSequence(expectedLoans)
+                .assertNext(page -> {
+                    assertEquals(2, page.getContent().size());
+                    assertEquals(summary1, page.getContent().get(0));
+                    assertEquals(summary2, page.getContent().get(1));
+                    assertEquals(0, page.getPage());
+                    assertEquals(10, page.getSize());
+                    assertEquals(2, page.getTotalElements());
+                })
                 .verifyComplete();
 
         verify(loanStatusRepository).findStatusByCodes(statusCodes);
@@ -144,8 +156,16 @@ public class GetLoanRequestUseCaseTest {
         when(repository.findLoanRequestsByStatusIn(List.of(1L, 2L, 3L), 10, 10)) // página 1 (offset = 10)
                 .thenReturn(Flux.empty());
 
+        when(repository.countLoanRequestByStatusIn(List.of(1L, 2L, 3L)))
+                .thenReturn(Mono.just(2L));
+
         StepVerifier.create(getLoanRequestUseCase.getLoanRequestsByStatus(statusCodes, 1, 10))
-                .expectNextCount(0)
+                .assertNext(page -> {
+                    assertThat(page.getContent()).isEmpty(); // o assertEquals(Collections.emptyList(), page.getContent());
+                    assertThat(page.getPage()).isEqualTo(1);
+                    assertThat(page.getSize()).isEqualTo(10);
+                    assertThat(page.getTotalElements()).isEqualTo(2L); // según tu mock
+                })
                 .verifyComplete();
 
         verify(loanStatusRepository).findStatusByCodes(statusCodes);
