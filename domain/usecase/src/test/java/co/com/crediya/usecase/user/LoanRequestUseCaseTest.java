@@ -46,7 +46,13 @@ public class LoanRequestUseCaseTest {
     @BeforeEach
     void setup(){
         loanStatus = new LoanStatus(1L, "PEND", "Pendiente de revision");
-        loanType = new LoanType(1L, "LIBRE", "Prestamos personal para libre inversion");
+        loanType = new LoanType(1L,
+                "LIBRE",
+                "Prestamos personal para libre inversion",
+                new BigDecimal(1000),
+                new BigDecimal(5000),
+                new BigDecimal("0.05"),
+                false);
         loanRequest = new LoanRequest(1L,
                 "112233",
                 BigDecimal.valueOf(1400000),

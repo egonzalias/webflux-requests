@@ -1,7 +1,6 @@
 package co.com.crediya.usecase.user;
 
 import co.com.crediya.model.exception.ValidationException;
-import co.com.crediya.model.loanrequest.LoanRequest;
 import co.com.crediya.model.loanrequest.LoanRequestSummary;
 import co.com.crediya.model.loanrequest.LoanStatus;
 import co.com.crediya.model.loanrequest.gateways.LoanRequestRepository;
@@ -9,7 +8,6 @@ import co.com.crediya.model.loanrequest.gateways.LoanStatusRepository;
 import co.com.crediya.model.loanrequest.gateways.LoggerService;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 
 import java.util.List;
 import java.util.stream.Collectors;
