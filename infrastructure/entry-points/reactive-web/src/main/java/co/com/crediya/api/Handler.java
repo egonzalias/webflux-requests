@@ -2,11 +2,13 @@ package co.com.crediya.api;
 
 
 import co.com.crediya.api.dto.LoanRequestCreateDTO;
+import co.com.crediya.api.dto.LoanRequestResponseDTO;
 import co.com.crediya.api.dto.PaginationStatusParams;
 import co.com.crediya.api.mapper.LoanRequestDTOMapper;
 import co.com.crediya.model.exception.ValidationException;
 import co.com.crediya.model.loanrequest.JwtUserInfo;
 import co.com.crediya.model.loanrequest.LoanRequest;
+import co.com.crediya.model.loanrequest.PageResponse;
 import co.com.crediya.usecase.user.GetLoanRequestUseCase;
 import co.com.crediya.usecase.user.LoanRequestUseCase;
 import io.jsonwebtoken.Jws;
@@ -61,11 +63,12 @@ public class Handler {
         return validateQueryParams(serverRequest)
                 .flatMap(params ->
                     getLoanRequestUseCase.getLoanRequestsByStatus(params.codeStatuses(), params.page(), params.size() )
-                            .map(loanRequestDTOMapper::toResponse)
-                            .collectList()
-                            .flatMap(list -> ServerResponse.ok()
-                                    .contentType(MediaType.APPLICATION_JSON)
-                                    .bodyValue(list))
+                            .map(loanRequestDTOMapper::toPageResponse)
+                            .flatMap(responseDTO ->
+                                    ServerResponse.ok()
+                                            .contentType(MediaType.APPLICATION_JSON)
+                                            .bodyValue(responseDTO)
+                            )
                 );
     }
 

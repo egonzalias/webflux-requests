@@ -5,8 +5,12 @@ import co.com.crediya.api.dto.LoanRequestResponseDTO;
 import co.com.crediya.model.loanrequest.LoanRequest;
 import co.com.crediya.model.loanrequest.LoanRequestSummary;
 import co.com.crediya.model.loanrequest.LoanType;
+import co.com.crediya.model.loanrequest.PageResponse;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Mapper(componentModel = "spring")
 /**
@@ -29,6 +33,19 @@ public interface LoanRequestDTOMapper {
     @Mapping(target = "createdAt", ignore = true)
     LoanRequest toModel(LoanRequestCreateDTO loanRequestCreateDTO);
 
+    default PageResponse<LoanRequestResponseDTO> toPageResponse(PageResponse<LoanRequestSummary> page) {
+        List<LoanRequestResponseDTO> content = page.getContent()
+                .stream()
+                .map(this::toResponse)
+                .collect(Collectors.toList());
+
+        return new PageResponse<>(
+                content,
+                page.getPage(),
+                page.getSize(),
+                page.getTotalElements()
+        );
+    }
 
     default LoanType map(String code) {
         if (code == null) {

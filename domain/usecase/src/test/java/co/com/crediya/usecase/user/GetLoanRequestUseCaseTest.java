@@ -104,7 +104,7 @@ public class GetLoanRequestUseCaseTest {
         when(loanStatusRepository.findStatusByCodes(statusCodes))
                 .thenReturn(Flux.fromIterable(foundStatuses));
 
-        when(repository.findByStatusIn(List.of(1L, 2L, 3L), 10, 0))
+        when(repository.findLoanRequestsByStatusIn(List.of(1L, 2L, 3L), 10, 0))
                 .thenReturn(Flux.fromIterable(expectedLoans));
 
         StepVerifier.create(getLoanRequestUseCase.getLoanRequestsByStatus(statusCodes, 0, 10))
@@ -112,7 +112,7 @@ public class GetLoanRequestUseCaseTest {
                 .verifyComplete();
 
         verify(loanStatusRepository).findStatusByCodes(statusCodes);
-        verify(repository).findByStatusIn(List.of(1L, 2L, 3L), 10, 0);
+        verify(repository).findLoanRequestsByStatusIn(List.of(1L, 2L, 3L), 10, 0);
     }
 
     @Test
@@ -141,7 +141,7 @@ public class GetLoanRequestUseCaseTest {
         when(loanStatusRepository.findStatusByCodes(statusCodes))
                 .thenReturn(Flux.fromIterable(foundStatuses));
 
-        when(repository.findByStatusIn(List.of(1L, 2L, 3L), 10, 10)) // página 1 (offset = 10)
+        when(repository.findLoanRequestsByStatusIn(List.of(1L, 2L, 3L), 10, 10)) // página 1 (offset = 10)
                 .thenReturn(Flux.empty());
 
         StepVerifier.create(getLoanRequestUseCase.getLoanRequestsByStatus(statusCodes, 1, 10))
@@ -149,7 +149,7 @@ public class GetLoanRequestUseCaseTest {
                 .verifyComplete();
 
         verify(loanStatusRepository).findStatusByCodes(statusCodes);
-        verify(repository).findByStatusIn(List.of(1L, 2L, 3L), 10, 10);
+        verify(repository).findLoanRequestsByStatusIn(List.of(1L, 2L, 3L), 10, 10);
     }
 
 

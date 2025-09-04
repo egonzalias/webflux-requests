@@ -7,7 +7,6 @@ import co.com.crediya.r2dbc.adapter.RequestReactiveRepository;
 import co.com.crediya.r2dbc.entity.LoanRequestEntity;
 import co.com.crediya.r2dbc.helper.ReactiveAdapterOperations;
 import co.com.crediya.r2dbc.mapper.LoanRequestMapper;
-import lombok.RequiredArgsConstructor;
 import org.reactivecommons.utils.ObjectMapper;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.reactive.TransactionalOperator;
@@ -51,10 +50,15 @@ public class MyReactiveRepositoryAdapter extends ReactiveAdapterOperations<
     }
 
     @Override
-    public Flux<LoanRequestSummary> findByStatusIn(List<Long> statusIds, int size, int offset) {
-        return repository.findByStatuses(statusIds, size, offset)
+    public Flux<LoanRequestSummary> findLoanRequestsByStatusIn(List<Long> statusIds, int size, int offset) {
+        return repository.findLoanRequestsByStatuses(statusIds, size, offset)
                 .doOnNext(entity -> System.out.println("Found EGR: " + entity)) // debug antes del map
                 .map(loanRequestMapper::toDomainExtend);
+    }
+
+    @Override
+    public Mono<Long> countLoanRequestByStatusIn(List<Long> statusIds) {
+        return repository.countLoanRequestsByStatusIn(statusIds);
     }
 
 }

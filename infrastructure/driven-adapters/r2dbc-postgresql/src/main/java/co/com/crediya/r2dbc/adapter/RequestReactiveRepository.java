@@ -7,6 +7,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.data.repository.query.ReactiveQueryByExampleExecutor;
 import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.List;
 
@@ -73,7 +74,10 @@ public interface RequestReactiveRepository extends ReactiveCrudRepository<LoanRe
         WHERE lr.status_id IN (:statuses)
         LIMIT :limit OFFSET :offset
    """)
-    Flux<LoanRequestExtendedDTO> findByStatuses(@Param("status") List<Long> statuses,
-                                              @Param("limit") int limit,
-                                              @Param("offset") int offset);
+    Flux<LoanRequestExtendedDTO> findLoanRequestsByStatuses(@Param("status") List<Long> statuses,
+                                                            @Param("limit") int limit,
+                                                            @Param("offset") int offset);
+
+    @Query("SELECT COUNT(*) FROM loan_requests WHERE status_id IN (:statusIds)")
+    Mono<Long> countLoanRequestsByStatusIn(List<Long> statusIds);
 }
