@@ -4,9 +4,9 @@ spring:
   application:
     name: "requests"
   r2dbc:
-    url: "r2dbc:postgresql://localhost:5432/crediya"
-    username: "postgres"
-    password: "admin"
+    url: ${SPRING_R2DBC_URL}
+    username: ${SPRING_R2DBC_USERNAME}
+    password: ${SPRING_R2DBC_PASSWORD}
     pool:
       enabled: true
     initialization-mode: "always"
@@ -30,5 +30,5 @@ management:
 cors:
   allowed-origins: "http://localhost:4200,http://localhost:8080"
 jwt:
-  secret: cHJhZ21hLmNyZWRpeWEuZWdvbnphbGlhcy5ib290Y2FtcC4yMDI1
-  expiration: 3600000
+  secret: ${JWT_SECRET}
+  expiration: ${JWT_TOKEN_EXPIRATION}
