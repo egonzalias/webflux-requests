@@ -61,4 +61,15 @@ public class MyReactiveRepositoryAdapter extends ReactiveAdapterOperations<
         return repository.countLoanRequestsByStatusIn(statusIds).defaultIfEmpty(0L);
     }
 
+    @Override
+    public Mono<LoanRequest> findLoanById(Long id) {
+        return repository.findById(String.valueOf(id))
+                .map(loanRequestMapper::toDomain);
+    }
+
+    @Override
+    public Mono<Void> updateloanRequest(Long id, Long statusId) {
+        return repository.updateStatusById(id, statusId).then();
+    }
+
 }

@@ -2,16 +2,15 @@ package co.com.crediya.api;
 
 
 import co.com.crediya.api.dto.LoanRequestCreateDTO;
-import co.com.crediya.api.dto.LoanRequestResponseDTO;
+import co.com.crediya.api.dto.LoanRequestUpdateStatusDTO;
 import co.com.crediya.api.dto.PaginationStatusParams;
 import co.com.crediya.api.mapper.LoanRequestDTOMapper;
 import co.com.crediya.model.exception.ValidationException;
 import co.com.crediya.model.loanrequest.JwtUserInfo;
 import co.com.crediya.model.loanrequest.LoanRequest;
-import co.com.crediya.model.loanrequest.PageResponse;
 import co.com.crediya.usecase.user.GetLoanRequestUseCase;
-import co.com.crediya.usecase.user.LoanRequestUseCase;
-import io.jsonwebtoken.Jws;
+import co.com.crediya.usecase.user.CreateLoanRequestUseCase;
+import co.com.crediya.usecase.user.UpdateLoanRequestUseCase;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
@@ -33,8 +32,9 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class Handler {
 
-    private final LoanRequestUseCase loanRequestUseCase;
+    private final CreateLoanRequestUseCase createLoanRequestUseCase;
     private final GetLoanRequestUseCase getLoanRequestUseCase;
+    private final UpdateLoanRequestUseCase updateLoanRequestUseCase;
     private final LoanRequestDTOMapper loanRequestDTOMapper;
     private final Validator validator;
 
@@ -54,7 +54,7 @@ public class Handler {
                             validate(dto);
                             LoanRequest domainRequest = loanRequestDTOMapper.toModel(dto);
 
-                            return loanRequestUseCase.loanRequest(domainRequest).then(ServerResponse.status(HttpStatus.CREATED).build());
+                            return createLoanRequestUseCase.loanRequest(domainRequest).then(ServerResponse.status(HttpStatus.CREATED).build());
                         })
                 );
     }
@@ -83,6 +83,22 @@ public class Handler {
             return Mono.error(new ValidationException(messages));
         }
         return Mono.empty();
+    }
+
+    public Mono<ServerResponse> updateLoanStatus(ServerRequest serverRequest) {
+        String idLoan = serverRequest.pathVariable("id");
+        if(idLoan.isBlank()){
+            return Mono.error(new ValidationException(List.of("El ID de la solicitud es requerido en la URL.")));
+        }
+        return serverRequest
+                .bodyToMono(LoanRequestUpdateStatusDTO.class)
+                .map(loanRequestDTOMapper::toModelUpdateStatus)
+                .map(model -> {
+                    model.setId(Long.valueOf(idLoan));
+                    return  model;
+                })
+                .flatMap(updateLoanRequestUseCase::updateLoanStatus)
+                .then(ServerResponse.status(HttpStatus.NO_CONTENT).build());
     }
 
     private Mono<PaginationStatusParams> validateQueryParams(ServerRequest request){

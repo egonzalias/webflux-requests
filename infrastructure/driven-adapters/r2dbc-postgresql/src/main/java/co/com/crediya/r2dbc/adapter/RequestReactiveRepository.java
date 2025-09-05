@@ -2,6 +2,7 @@ package co.com.crediya.r2dbc.adapter;
 
 import co.com.crediya.r2dbc.dto.LoanRequestExtendedDTO;
 import co.com.crediya.r2dbc.entity.LoanRequestEntity;
+import org.springframework.data.r2dbc.repository.Modifying;
 import org.springframework.data.r2dbc.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.data.repository.query.ReactiveQueryByExampleExecutor;
@@ -80,4 +81,8 @@ public interface RequestReactiveRepository extends ReactiveCrudRepository<LoanRe
 
     @Query("SELECT COUNT(*) FROM loan_requests WHERE status_id IN (:statusIds)")
     Mono<Long> countLoanRequestsByStatusIn(List<Long> statusIds);
+
+    @Modifying
+    @Query("UPDATE loan_requests SET status_id = :statusId WHERE id = :id")
+    Mono<Integer> updateStatusById(@Param("id") Long id, @Param("statusId") Long statusId);
 }

@@ -30,7 +30,7 @@ import static org.mockito.Mockito.*;
 
 
 @ExtendWith(MockitoExtension.class)
-public class GetLoanRequestUseCaseTest {
+public class GetCreateLoanRequestUseCaseTest {
 
     @Mock
     private LoanRequestRepository repository;

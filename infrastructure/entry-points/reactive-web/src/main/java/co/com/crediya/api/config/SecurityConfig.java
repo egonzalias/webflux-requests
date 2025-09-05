@@ -20,6 +20,7 @@ public class SecurityConfig {
                         .pathMatchers("/public/**").permitAll()
                         .pathMatchers(HttpMethod.POST, "/api/v1/solicitud").hasRole("CLIENTE")
                         .pathMatchers(HttpMethod.GET,"/api/v1/solicitud").hasRole("ASESOR")
+                        .pathMatchers(HttpMethod.PATCH,"/api/v1/solicitud/*/estado").hasRole("ASESOR")
                         .anyExchange().authenticated()
                 )
                 //Here is inserted the custom filter before the standard authentication filter

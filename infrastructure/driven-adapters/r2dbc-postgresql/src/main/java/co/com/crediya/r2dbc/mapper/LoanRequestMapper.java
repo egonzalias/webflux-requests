@@ -6,6 +6,7 @@ import co.com.crediya.model.loanrequest.LoanRequestSummary;
 import co.com.crediya.model.loanrequest.LoanStatus;
 import co.com.crediya.model.loanrequest.LoanType;
 import co.com.crediya.r2dbc.dto.LoanRequestExtendedDTO;
+import co.com.crediya.r2dbc.entity.LoanRequestEntity;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
@@ -29,6 +30,20 @@ public interface LoanRequestMapper {
         /*@Mapping(target = "status", source = "loanStatus.id")
         @Mapping(target = "loanType", source = "loanTypeCode.id")
         LoanRequestEntity toEntity(LoanRequest domain);*/
+
+        @Mapping(target = "loanStatus", expression = "java(mapLoanStatus(domain.getStatus()))")
+        @Mapping(target = "loanTypeCode", expression = "java(mapLoanType(domain.getLoanType()))")
+        LoanRequest toDomain(LoanRequestEntity domain);
+
+        // Mapeo de Long -> LoanStatus
+        default LoanStatus mapLoanStatus(Long id) {
+                return id == null ? null : LoanStatus.builder().id(id).build();
+        }
+
+        // Mapeo de Long -> LoanType
+        default LoanType mapLoanType(Long id) {
+                return id == null ? null : LoanType.builder().id(id).build();
+        }
 
         // Auxiliar methods used in the expressions
         default LoanStatus mapToLoanStatus(LoanRequestExtendedDTO dto) {

@@ -2,10 +2,8 @@ package co.com.crediya.api.mapper;
 
 import co.com.crediya.api.dto.LoanRequestCreateDTO;
 import co.com.crediya.api.dto.LoanRequestResponseDTO;
-import co.com.crediya.model.loanrequest.LoanRequest;
-import co.com.crediya.model.loanrequest.LoanRequestSummary;
-import co.com.crediya.model.loanrequest.LoanType;
-import co.com.crediya.model.loanrequest.PageResponse;
+import co.com.crediya.api.dto.LoanRequestUpdateStatusDTO;
+import co.com.crediya.model.loanrequest.*;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
@@ -32,6 +30,8 @@ public interface LoanRequestDTOMapper {
     @Mapping(target = "loanStatus", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     LoanRequest toModel(LoanRequestCreateDTO loanRequestCreateDTO);
+
+    LoanRequestUpdateStatus toModelUpdateStatus(LoanRequestUpdateStatusDTO loanRequestUpdateStatusDTO);
 
     default PageResponse<LoanRequestResponseDTO> toPageResponse(PageResponse<LoanRequestSummary> page) {
         List<LoanRequestResponseDTO> content = page.getContent()

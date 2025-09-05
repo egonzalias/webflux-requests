@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @RequiredArgsConstructor
-public class LoanRequestUseCase {
+public class CreateLoanRequestUseCase {
 
     private final LoanRequestRepository repository;
     private final LoanStatusRepository loanStatusRepository;

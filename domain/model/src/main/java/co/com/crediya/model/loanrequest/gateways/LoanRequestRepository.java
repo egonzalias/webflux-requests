@@ -12,4 +12,6 @@ public interface LoanRequestRepository {
     Flux<LoanRequest> findByStatus(Long codeStatus, int page, int offset);
     Flux<LoanRequestSummary> findLoanRequestsByStatusIn(List<Long> statusIds, int size, int offset);
     Mono<Long> countLoanRequestByStatusIn(List<Long> statusIds);
+    Mono<LoanRequest> findLoanById(Long id);
+    Mono<Void> updateloanRequest(Long id, Long statusId);
 }

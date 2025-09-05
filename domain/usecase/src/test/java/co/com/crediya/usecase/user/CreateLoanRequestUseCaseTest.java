@@ -25,7 +25,7 @@ import java.time.LocalTime;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-public class LoanRequestUseCaseTest {
+public class CreateLoanRequestUseCaseTest {
 
     @Mock
     private LoanRequestRepository repository;
@@ -39,7 +39,7 @@ public class LoanRequestUseCaseTest {
     private LoanType loanType;
     private LoanStatus loanStatus;
     private LoanRequest loanRequest;
-    private LoanRequestUseCase loanRequestUseCase;
+    private CreateLoanRequestUseCase createLoanRequestUseCase;
 
 
 
@@ -61,7 +61,7 @@ public class LoanRequestUseCaseTest {
                 loanStatus,
                 LocalDate.of(1995, 5, 20).atTime(LocalTime.now()));
 
-        loanRequestUseCase = new LoanRequestUseCase(repository, loanStatusRepository, loanTypeRepository, loggerService);
+        createLoanRequestUseCase = new CreateLoanRequestUseCase(repository, loanStatusRepository, loanTypeRepository, loggerService);
     }
 
     @Test
@@ -70,7 +70,7 @@ public class LoanRequestUseCaseTest {
         when(loanTypeRepository.findByCode("LIBRE")).thenReturn(Mono.just(loanType));
         when(repository.loanRequest(loanRequest)).thenReturn(Mono.empty());
 
-        loanRequestUseCase.loanRequest(loanRequest).as(StepVerifier::create).verifyComplete();
+        createLoanRequestUseCase.loanRequest(loanRequest).as(StepVerifier::create).verifyComplete();
 
         verify(loanStatusRepository).findStatusByCode("PEND");
         verify(loanTypeRepository).findByCode(loanRequest.getLoanTypeCode().getName());
@@ -82,7 +82,7 @@ public class LoanRequestUseCaseTest {
         when(loanStatusRepository.findStatusByCode("PEND")).thenReturn(Mono.empty());
         when(loanTypeRepository.findByCode("LIBRE")).thenReturn(Mono.just(loanType));
 
-        loanRequestUseCase.loanRequest(loanRequest).as(StepVerifier::create)
+        createLoanRequestUseCase.loanRequest(loanRequest).as(StepVerifier::create)
                         .expectErrorSatisfies(error ->{
                             ValidationException ve = (ValidationException) error;
                             Assertions.assertInstanceOf(ValidationException.class, error);
@@ -95,7 +95,7 @@ public class LoanRequestUseCaseTest {
         when(loanStatusRepository.findStatusByCode("PEND")).thenReturn(Mono.just(loanStatus));
         when(loanTypeRepository.findByCode("LIBRE")).thenReturn(Mono.empty());
 
-        loanRequestUseCase.loanRequest(loanRequest).as(StepVerifier::create)
+        createLoanRequestUseCase.loanRequest(loanRequest).as(StepVerifier::create)
                 .expectErrorSatisfies(error ->{
                     ValidationException ve = (ValidationException) error;
                     Assertions.assertInstanceOf(ValidationException.class, error);
