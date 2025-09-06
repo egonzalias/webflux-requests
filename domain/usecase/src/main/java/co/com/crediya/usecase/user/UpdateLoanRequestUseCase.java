@@ -25,10 +25,17 @@ public class UpdateLoanRequestUseCase {
                 .switchIfEmpty(Mono.error(new ValidationException(List.of("El estado '"+statusCode+"' es incorrecto o no existe en la base de datos."))))
                 .flatMap(loanStatus -> {
                     return repository.findLoanById(id)
-                            .switchIfEmpty(Mono.error(new ValidationException(List.of("El solicitud de prestamo con ID: "+id+" no existe en la base de datos."))))
+                            .switchIfEmpty(Mono.error(new ValidationException(List.of("La solicitud de prestamo con ID: "+id+" no existe en la base de datos."))))
                             .flatMap(loanRequest -> {
-                                return repository.updateloanRequest(id, loanStatus.getId()).then(sqsService.sendMessage("Hola EGR", queueName)
-                                        .onErrorMap(e -> new RuntimeException("Error enviando mensaje a SQS, realizando rollback", e)));
+                                Long previousStatusId = loanRequest.getLoanStatus().getId();
+                                return repository.updateloanRequest(id, loanStatus.getId())
+                                        .then(sqsService.sendMessage("Hola EGR", queueName)
+                                                .onErrorResume(error -> {
+                                                    logger.error("Error enviando mensaje a SQS, realizando rollback.", error);
+                                                    return repository.updateloanRequest(id, previousStatusId)
+                                                            .doOnSuccess(avoid ->logger.info("La solicitud de prestamo con ID: {} fue actualizada a su estado original.", id))
+                                                            .then(Mono.error(new ValidationException(List.of("Error enviando mensaje a SQS, realizando rollback."))));
+                                                }));
                             });
                 });
     }
