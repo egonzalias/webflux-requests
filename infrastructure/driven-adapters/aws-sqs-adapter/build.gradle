@@ -1,0 +1,13 @@
+plugins {
+    id 'java'
+}
+
+dependencies {
+    implementation project(':model')
+    implementation 'org.springframework.boot:spring-boot-starter'
+    implementation 'org.springframework:spring-context'
+    implementation platform('software.amazon.awssdk:bom:2.33.2')
+    implementation 'software.amazon.awssdk:sqs'
+    implementation 'software.amazon.awssdk:auth'
+    implementation 'software.amazon.awssdk:regions'
+}

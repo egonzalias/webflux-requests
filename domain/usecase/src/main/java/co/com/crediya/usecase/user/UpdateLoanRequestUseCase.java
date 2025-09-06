@@ -2,14 +2,9 @@ package co.com.crediya.usecase.user;
 
 import co.com.crediya.model.exception.ValidationException;
 import co.com.crediya.model.loanrequest.LoanRequestUpdateStatus;
-import co.com.crediya.model.loanrequest.gateways.LoanRequestRepository;
-import co.com.crediya.model.loanrequest.gateways.LoanStatusRepository;
-import co.com.crediya.model.loanrequest.gateways.LoanTypeRepository;
-import co.com.crediya.model.loanrequest.gateways.LoggerService;
+import co.com.crediya.model.loanrequest.gateways.*;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
-
-import java.time.LocalDateTime;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -19,8 +14,9 @@ public class UpdateLoanRequestUseCase {
     private final LoanStatusRepository loanStatusRepository;
     private final LoanTypeRepository loanTypeRepository;
     private final LoggerService logger;
+    private final SqsService sqsService;
 
-    public Mono<Void> updateLoanStatus(LoanRequestUpdateStatus loanRequestUpdateStatus){
+    public Mono<Void> updateLoanStatus(LoanRequestUpdateStatus loanRequestUpdateStatus, String queueName){
         String statusCode = loanRequestUpdateStatus.getStatus();
         Long id = loanRequestUpdateStatus.getId();
 
@@ -31,7 +27,8 @@ public class UpdateLoanRequestUseCase {
                     return repository.findLoanById(id)
                             .switchIfEmpty(Mono.error(new ValidationException(List.of("El solicitud de prestamo con ID: "+id+" no existe en la base de datos."))))
                             .flatMap(loanRequest -> {
-                                return repository.updateloanRequest(id, loanStatus.getId());
+                                return repository.updateloanRequest(id, loanStatus.getId()).then(sqsService.sendMessage("Hola EGR", queueName)
+                                        .onErrorMap(e -> new RuntimeException("Error enviando mensaje a SQS, realizando rollback", e)));
                             });
                 });
     }

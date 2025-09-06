@@ -69,7 +69,7 @@ public class MyReactiveRepositoryAdapter extends ReactiveAdapterOperations<
 
     @Override
     public Mono<Void> updateloanRequest(Long id, Long statusId) {
-        return repository.updateStatusById(id, statusId).then();
+        return transactionalOperator.execute(tx -> repository.updateStatusById(id, statusId).then()).then();
     }
 
 }

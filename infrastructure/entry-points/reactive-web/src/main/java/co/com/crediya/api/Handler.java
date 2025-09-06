@@ -12,6 +12,7 @@ import co.com.crediya.usecase.user.GetLoanRequestUseCase;
 import co.com.crediya.usecase.user.CreateLoanRequestUseCase;
 import co.com.crediya.usecase.user.UpdateLoanRequestUseCase;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -37,6 +38,8 @@ public class Handler {
     private final UpdateLoanRequestUseCase updateLoanRequestUseCase;
     private final LoanRequestDTOMapper loanRequestDTOMapper;
     private final Validator validator;
+    @Value("${aws.queue-loan-status-update}")
+    private String queueLoanStatusUpdate;
 
     public Mono<ServerResponse> loanRequest(ServerRequest serverRequest) {
 
@@ -97,7 +100,7 @@ public class Handler {
                     model.setId(Long.valueOf(idLoan));
                     return  model;
                 })
-                .flatMap(updateLoanRequestUseCase::updateLoanStatus)
+                .flatMap(model -> updateLoanRequestUseCase.updateLoanStatus(model, queueLoanStatusUpdate))
                 .then(ServerResponse.status(HttpStatus.NO_CONTENT).build());
     }
 
