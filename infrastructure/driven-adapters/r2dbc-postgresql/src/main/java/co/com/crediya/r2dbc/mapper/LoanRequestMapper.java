@@ -25,6 +25,8 @@ public interface LoanRequestMapper {
         @Mapping(source = "document_number", target = "documentNumber")
         @Mapping(source = "term_months", target = "termInMonths")
         @Mapping(source = "created_at", target = "createdAt")
+        @Mapping(source = "first_name", target = "firstName")
+        @Mapping(source = "last_name", target = "lastName")
         LoanRequestSummary toDomainExtend(LoanRequestExtendedDTO entity);
 
         /*@Mapping(target = "status", source = "loanStatus.id")

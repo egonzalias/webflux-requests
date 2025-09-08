@@ -10,4 +10,6 @@ dependencies {
     implementation 'software.amazon.awssdk:sqs'
     implementation 'software.amazon.awssdk:auth'
     implementation 'software.amazon.awssdk:regions'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.2'
+
 }

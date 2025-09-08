@@ -2,6 +2,7 @@ package co.com.crediya.usecase.user;
 
 import co.com.crediya.model.exception.ValidationException;
 import co.com.crediya.model.loanrequest.LoanRequestUpdateStatus;
+import co.com.crediya.model.loanrequest.MessageBody;
 import co.com.crediya.model.loanrequest.gateways.*;
 import lombok.RequiredArgsConstructor;
 import reactor.core.publisher.Mono;
@@ -24,12 +25,19 @@ public class UpdateLoanRequestUseCase {
                 .doOnNext(status -> logger.debug("Loan status found: {}", status))
                 .switchIfEmpty(Mono.error(new ValidationException(List.of("El estado '"+statusCode+"' es incorrecto o no existe en la base de datos."))))
                 .flatMap(loanStatus -> {
-                    return repository.findLoanById(id)
+                    return repository.findLoanRequestsById(id)
                             .switchIfEmpty(Mono.error(new ValidationException(List.of("La solicitud de prestamo con ID: "+id+" no existe en la base de datos."))))
                             .flatMap(loanRequest -> {
                                 Long previousStatusId = loanRequest.getLoanStatus().getId();
                                 return repository.updateloanRequest(id, loanStatus.getId())
-                                        .then(sqsService.sendMessage("Hola EGR", queueName)
+                                        .then(sqsService.sendMessage(
+                                                    new MessageBody(
+                                                        String.valueOf(id),
+                                                        loanRequest.getLoanStatus().getDescription(),
+                                                        loanRequest.getEmail(),
+                                                            loanRequest.getFirstName() + " " + loanRequest.getLastName()
+                                                    ),
+                                                    queueName)
                                                 .onErrorResume(error -> {
                                                     logger.error("Error enviando mensaje a SQS, realizando rollback.", error);
                                                     return repository.updateloanRequest(id, previousStatusId)

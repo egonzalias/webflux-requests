@@ -14,4 +14,5 @@ public interface LoanRequestRepository {
     Mono<Long> countLoanRequestByStatusIn(List<Long> statusIds);
     Mono<LoanRequest> findLoanById(Long id);
     Mono<Void> updateloanRequest(Long id, Long statusId);
+    Mono<LoanRequestSummary> findLoanRequestsById(Long id);
 }

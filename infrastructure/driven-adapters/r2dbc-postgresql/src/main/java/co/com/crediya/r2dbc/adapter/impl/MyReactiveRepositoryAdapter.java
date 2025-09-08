@@ -72,4 +72,11 @@ public class MyReactiveRepositoryAdapter extends ReactiveAdapterOperations<
         return transactionalOperator.execute(tx -> repository.updateStatusById(id, statusId).then()).then();
     }
 
+    @Override
+    public Mono<LoanRequestSummary> findLoanRequestsById(Long id) {
+        return repository.findLoanRequestsById(id)
+                .doOnNext(entity -> System.out.println("Found EGR: " + entity)) // debug antes del map
+                .map(loanRequestMapper::toDomainExtend);
+    }
+
 }

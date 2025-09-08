@@ -18,4 +18,7 @@ public class LoanRequestSummary {
     private LoanStatus loanStatus;
     private LocalDateTime createdAt;
     private BigDecimal approved_monthly_debt;
+    private String firstName;
+    private String lastName;
+    private String email;
 }

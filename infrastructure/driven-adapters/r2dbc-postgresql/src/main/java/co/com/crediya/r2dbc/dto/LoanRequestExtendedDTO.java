@@ -31,4 +31,8 @@ public class LoanRequestExtendedDTO {
     private BigDecimal approved_monthly_debt;
 
     private LocalDateTime created_at;
+
+    private String first_name;
+    private String last_name;
+    private String email;
 }

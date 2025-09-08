@@ -85,4 +85,32 @@ public interface RequestReactiveRepository extends ReactiveCrudRepository<LoanRe
     @Modifying
     @Query("UPDATE loan_requests SET status_id = :statusId WHERE id = :id")
     Mono<Integer> updateStatusById(@Param("id") Long id, @Param("statusId") Long statusId);
+
+    @Query("""
+    SELECT
+          lr.id,
+          lr.document_number,
+          lr.amount,
+          lr.term_months,
+          lt.id as loan_type_id,
+          lt.name as loan_type_name,
+          lt.description as loan_type_description,
+          lt.minimum_amount as loan_type_minimum_amount,
+          lt.maximum_amount as loan_type_maximum_amount,
+          lt.interest_rate as loan_type_interest_rate,
+          lt.automatic_validation as loan_type_automatic_validation,
+          ls.id AS status_id,
+          ls.code AS status_code,
+          ls.description AS status_description,
+          lr.created_at,
+          us.first_name,
+          us.last_name,
+          us.email
+        FROM loan_requests lr
+        JOIN loan_types lt ON lr.loan_type_id = lt.id
+        JOIN loan_statuses ls ON lr.status_id = ls.id
+        JOIN users us ON lr.document_number = us.document_number
+        WHERE lr.id = :id
+   """)
+    Mono<LoanRequestExtendedDTO> findLoanRequestsById(@Param("id") Long id);
 }
