@@ -13,7 +13,6 @@ public class UpdateLoanRequestUseCase {
 
     private final LoanRequestRepository repository;
     private final LoanStatusRepository loanStatusRepository;
-    private final LoanTypeRepository loanTypeRepository;
     private final LoggerService logger;
     private final SqsService sqsService;
 
