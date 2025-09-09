@@ -25,6 +25,7 @@ public class UpdateLoanRequestUseCase {
                 .doOnNext(status -> logger.debug("Loan status found: {}", status))
                 .switchIfEmpty(Mono.error(new ValidationException(List.of("El estado '"+statusCode+"' es incorrecto o no existe en la base de datos."))))
                 .flatMap(loanStatus -> {
+                    String newStatusDescription = loanStatus.getDescription();
                     return repository.findLoanRequestsById(id)
                             .switchIfEmpty(Mono.error(new ValidationException(List.of("La solicitud de prestamo con ID: "+id+" no existe en la base de datos."))))
                             .flatMap(loanRequest -> {
@@ -33,7 +34,7 @@ public class UpdateLoanRequestUseCase {
                                         .then(sqsService.sendMessage(
                                                     new MessageBody(
                                                         String.valueOf(id),
-                                                        loanRequest.getLoanStatus().getDescription(),
+                                                            newStatusDescription,
                                                         loanRequest.getEmail(),
                                                             loanRequest.getFirstName() + " " + loanRequest.getLastName()
                                                     ),
