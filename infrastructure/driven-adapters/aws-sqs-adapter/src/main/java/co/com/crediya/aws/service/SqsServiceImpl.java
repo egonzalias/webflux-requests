@@ -4,6 +4,7 @@ import co.com.crediya.model.loanrequest.gateways.LoggerService;
 import co.com.crediya.model.loanrequest.gateways.SqsService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
@@ -14,7 +15,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import java.util.concurrent.CompletableFuture;
 
 @Service
-@RequiredArgsConstructor
 public class SqsServiceImpl implements SqsService {
 
     private final SqsAsyncClient sqsAsyncClient;
@@ -24,6 +24,13 @@ public class SqsServiceImpl implements SqsService {
     private String awsUrl;
     @Value("${aws.account-id}")
     private String accountId;
+
+    public SqsServiceImpl(@Qualifier("sqsAsyncClient") SqsAsyncClient sqsAsyncClient, LoggerService loggerService) {
+        this.sqsAsyncClient = sqsAsyncClient;
+        this.loggerService = loggerService;
+    }
+
+
 
     public Mono<Void> sendMessage(Object messageBody, String queueName) {
         ObjectMapper objectMapper = new ObjectMapper();

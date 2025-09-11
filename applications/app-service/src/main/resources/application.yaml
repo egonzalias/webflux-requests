@@ -4,9 +4,9 @@ spring:
   application:
     name: "requests"
   r2dbc:
-    url: ${SPRING_R2DBC_URL}
-    username: ${SPRING_R2DBC_USERNAME}
-    password: ${SPRING_R2DBC_PASSWORD}
+    url: "${SPRING_R2DBC_URL}"
+    username: "${SPRING_R2DBC_USERNAME}"
+    password: "${SPRING_R2DBC_PASSWORD}"
     pool:
       enabled: true
     initialization-mode: "always"
@@ -30,13 +30,22 @@ management:
 cors:
   allowed-origins: "http://localhost:4200,http://localhost:8080"
 jwt:
-  secret: ${JWT_SECRET}
-  expiration: ${JWT_TOKEN_EXPIRATION}
+  secret: "${JWT_SECRET}"
+  expiration: "${JWT_TOKEN_EXPIRATION}"
 aws:
-  url: ${AWS_URL}
-  account-id: ${AWS_ACCOUNT_ID}
-  access-key-id: ${AWS_ACCESS_KEY_ID}
-  secret-access-key: ${AWS_SECRET_ACCESS_KEY}
-  region: ${AWS_REGION}
-  queue-loan-status-update: ${AWS_QUEUE_LOAN_STATUS}
-  queue-loan-auto-evaluation: ${AWS_QUEUE_AUTO_EVALUATION}
+  url: "${AWS_URL}"
+  account-id: "${AWS_ACCOUNT_ID}"
+  access-key-id: "${AWS_ACCESS_KEY_ID}"
+  secret-access-key: "${AWS_SECRET_ACCESS_KEY}"
+  region: "${AWS_REGION}"
+  queue-loan-status-update: "${AWS_QUEUE_LOAN_STATUS}"
+  queue-loan-auto-evaluation: "${AWS_QUEUE_AUTO_EVALUATION}"
+entrypoint:
+  sqs:
+    region: "${AWS_REGION}"
+    #endpoint: "http://localhost:4566"
+    queueUrl: "${AWS_QUEUE_CREDIT_DECISION}"
+    waitTimeSeconds: 20
+    maxNumberOfMessages: 10
+    visibilityTimeoutSeconds: 10
+    numberOfThreads: 1

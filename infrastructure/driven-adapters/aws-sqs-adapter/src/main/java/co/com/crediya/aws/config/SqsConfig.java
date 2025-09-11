@@ -12,7 +12,7 @@ import software.amazon.awssdk.services.sqs.SqsAsyncClient;
 public class SqsConfig {
 
 
-    @Bean
+    @Bean("sqsAsyncClient")
     public SqsAsyncClient sqsAsyncClient(@Value("${aws.region}") String region) {
         return SqsAsyncClient.builder()
                 .region(Region.of(region))
