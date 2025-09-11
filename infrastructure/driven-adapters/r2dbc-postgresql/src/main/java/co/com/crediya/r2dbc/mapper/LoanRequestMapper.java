@@ -1,10 +1,7 @@
 package co.com.crediya.r2dbc.mapper;
 
 
-import co.com.crediya.model.loanrequest.LoanRequest;
-import co.com.crediya.model.loanrequest.LoanRequestSummary;
-import co.com.crediya.model.loanrequest.LoanStatus;
-import co.com.crediya.model.loanrequest.LoanType;
+import co.com.crediya.model.loanrequest.*;
 import co.com.crediya.r2dbc.dto.LoanRequestExtendedDTO;
 import co.com.crediya.r2dbc.entity.LoanRequestEntity;
 import org.mapstruct.Mapper;

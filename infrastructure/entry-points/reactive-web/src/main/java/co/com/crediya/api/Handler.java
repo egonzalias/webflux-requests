@@ -40,6 +40,8 @@ public class Handler {
     private final Validator validator;
     @Value("${aws.queue-loan-status-update}")
     private String queueLoanStatusUpdate;
+    @Value("${aws.queue-loan-auto-evaluation}")
+    private String queueLoanAutoEvaluation;
 
     public Mono<ServerResponse> loanRequest(ServerRequest serverRequest) {
 
@@ -57,7 +59,7 @@ public class Handler {
                             validate(dto);
                             LoanRequest domainRequest = loanRequestDTOMapper.toModel(dto);
 
-                            return createLoanRequestUseCase.loanRequest(domainRequest).then(ServerResponse.status(HttpStatus.CREATED).build());
+                            return createLoanRequestUseCase.loanRequest(domainRequest, queueLoanAutoEvaluation).then(ServerResponse.status(HttpStatus.CREATED).build());
                         })
                 );
     }

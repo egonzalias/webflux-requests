@@ -1,5 +1,6 @@
 package co.com.crediya.r2dbc.adapter.impl;
 
+import co.com.crediya.model.loanrequest.ActiveLoan;
 import co.com.crediya.model.loanrequest.LoanRequest;
 import co.com.crediya.model.loanrequest.LoanRequestSummary;
 import co.com.crediya.model.loanrequest.gateways.LoanRequestRepository;
@@ -34,12 +35,16 @@ public class MyReactiveRepositoryAdapter extends ReactiveAdapterOperations<
     }
 
     @Override
-    public Mono<Void> loanRequest(LoanRequest loanRequest) {
+    public Mono<LoanRequest> loanRequest(LoanRequest loanRequest) {
         LoanRequestEntity entity = mapper.map(loanRequest, LoanRequestEntity.class);
         entity.setStatus(loanRequest.getLoanStatus().getId());
         entity.setLoanType(loanRequest.getLoanTypeCode().getId());
         entity.setDocumentNumber(loanRequest.getDocumentNumber());
-        return transactionalOperator.execute(tx -> repository.save(entity).then()).then();
+        return transactionalOperator.execute(tx ->
+                repository.save(entity)
+                        .map(savedEntity -> mapper.map(savedEntity, LoanRequest.class))
+                )
+                .single();
     }
 
     @Override
@@ -77,6 +82,12 @@ public class MyReactiveRepositoryAdapter extends ReactiveAdapterOperations<
         return repository.findLoanRequestsById(id)
                 .doOnNext(entity -> System.out.println("Found EGR: " + entity)) // debug antes del map
                 .map(loanRequestMapper::toDomainExtend);
+    }
+
+    @Override
+    public Flux<ActiveLoan> findLoansByUserAndStatus(String documentNumber, String statusCode) {
+        return repository.findLoansByUserAndStatus(documentNumber, statusCode)
+                .doOnNext(data -> System.out.println(data));
     }
 
 }

@@ -1,5 +1,7 @@
 package co.com.crediya.r2dbc.adapter;
 
+import co.com.crediya.model.loanrequest.ActiveLoan;
+import co.com.crediya.r2dbc.dto.ActiveLoanDTO;
 import co.com.crediya.r2dbc.dto.LoanRequestExtendedDTO;
 import co.com.crediya.r2dbc.entity.LoanRequestEntity;
 import org.springframework.data.r2dbc.repository.Modifying;
@@ -113,4 +115,19 @@ public interface RequestReactiveRepository extends ReactiveCrudRepository<LoanRe
         WHERE lr.id = :id
    """)
     Mono<LoanRequestExtendedDTO> findLoanRequestsById(@Param("id") Long id);
+
+    @Query("""
+    SELECT lr.id,
+        lr.amount,
+        lr.term_months,
+        lt.interest_rate
+        FROM loan_requests lr
+        JOIN loan_statuses ls ON lr.status_id = ls.id
+        JOIN loan_types lt ON lr.loan_type_id = lt.id
+        WHERE lr.document_number = :documentNumber
+        AND ls.code = :status
+   """)
+    Flux<ActiveLoan> findLoansByUserAndStatus(@Param("documentNumber") String documentNumber,
+                                              @Param("status") String statusCode);
+
 }

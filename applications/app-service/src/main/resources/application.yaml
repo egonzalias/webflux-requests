@@ -39,3 +39,4 @@ aws:
   secret-access-key: ${AWS_SECRET_ACCESS_KEY}
   region: ${AWS_REGION}
   queue-loan-status-update: ${AWS_QUEUE_LOAN_STATUS}
+  queue-loan-auto-evaluation: ${AWS_QUEUE_AUTO_EVALUATION}
