@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 import software.amazon.awssdk.services.sqs.model.Message;
-import software.amazon.awssdk.thirdparty.jackson.core.JsonProcessingException;
 
 import java.util.List;
 import java.util.function.Function;
@@ -38,7 +37,7 @@ public class SQSProcessor implements Function<Message, Mono<Void>> {
             loanRequestUpdateStatus.setStatus(dto.getDecision());
             return updateLoanRequestUseCase.updateLoanStatus(loanRequestUpdateStatus, queueLoanStatusUpdate);
         }catch (Exception e){
-            logger.info("Error processing message queue... ", e.getMessage());
+            logger.error("Error processing message queue... ", e);
             return Mono.error(new ValidationException(List.of(e.getMessage())));
         }
     }

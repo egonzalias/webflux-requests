@@ -28,7 +28,7 @@ public class UpdateLoanRequestUseCase {
                     String newStatusDescription = loanStatus.getDescription();
 
                     return repository.findLoanRequestsById(id)
-                            .switchIfEmpty(Mono.error(new ValidationException(List.of("La solicitud de préstamo con ID: " + id + " no existe en la base de datos."))))
+                            .switchIfEmpty(Mono.error(new ValidationException(List.of("La solicitud de prestamo con ID: " + id + " no existe en la base de datos."))))
                             .flatMap(loanRequest -> {
                                 Long previousStatusId = loanRequest.getLoanStatus().getId();
 
@@ -49,10 +49,10 @@ public class UpdateLoanRequestUseCase {
                                             ).doOnSuccess(ignored ->
                                                     logger.info("Message for loan ID {} was successfully sent to queue {}", id, queueName)
                                             ).onErrorResume(error -> {
-                                                logger.error("Error sending message to SQS. Performing rollback...", error);
+                                                logger.error("Error enviando mensaje a SQS, realizando rollback ", error);
                                                 return repository.updateloanRequest(id, previousStatusId)
                                                         .doOnSuccess(avoid -> logger.info("Rolled back status update for loan ID {}", id))
-                                                        .then(Mono.error(new ValidationException(List.of("Error enviando mensaje a SQS, se realizó rollback."))));
+                                                        .then(Mono.error(new ValidationException(List.of("Error enviando mensaje a SQS, reealizando rollback."))));
                                             })
                                     );
                                 }else{

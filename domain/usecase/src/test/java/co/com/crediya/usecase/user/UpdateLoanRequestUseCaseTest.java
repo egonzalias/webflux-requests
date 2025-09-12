@@ -2,6 +2,7 @@ package co.com.crediya.usecase.user;
 
 import co.com.crediya.model.exception.ValidationException;
 import co.com.crediya.model.loanrequest.*;
+import co.com.crediya.model.loanrequest.enums.LoanStatusEnum;
 import co.com.crediya.model.loanrequest.gateways.LoanRequestRepository;
 import co.com.crediya.model.loanrequest.gateways.LoanStatusRepository;
 import co.com.crediya.model.loanrequest.gateways.LoggerService;
@@ -42,7 +43,7 @@ public class UpdateLoanRequestUseCaseTest {
 
 
     private final Long loanRequestId = 1L;
-    private final String statusCode = "APROB";
+    private final String statusCode = LoanStatusEnum.APROB.name();
     private final String queueName = "test-queue";
 
     private LoanRequestUpdateStatus loanRequestUpdateStatus;
@@ -136,10 +137,10 @@ public class UpdateLoanRequestUseCaseTest {
         when(repository.updateloanRequest(loanRequestId, previousStatus.getId())).thenReturn(Mono.empty());
 
         StepVerifier.create(updateLoanRequestUseCase.updateLoanStatus(loanRequestUpdateStatus, queueName))
-                .expectErrorSatisfies(error ->{
+                .expectErrorSatisfies(error -> {
                     assertTrue(error instanceof ValidationException);
                     ValidationException ve = (ValidationException) error;
-                    Assertions.assertTrue(ve.getErrors().stream().anyMatch(msg -> msg.contains("Error enviando mensaje a SQS, realizando rollback")));
+                    Assertions.assertTrue(ve.getErrors().stream().anyMatch(msg -> msg.contains("Error enviando mensaje a SQS, reealizando rollback")));
                 })
                 .verify();
 
@@ -177,5 +178,29 @@ public class UpdateLoanRequestUseCaseTest {
         assertEquals("Alice Smith", sentMessage.getFullName());
     }
 
+    @Test
+    void shouldNotSendToSqsWhenStatusIsNeitherAprobNorRech() {
+        LoanStatus newStatus = new LoanStatus(3L, LoanStatusEnum.CAN.name(), "En revisión");
+        LoanStatus previousStatus = new LoanStatus(1L, LoanStatusEnum.PEND.name(), "Pendiente");
 
+        LoanRequestSummary loanRequestSummary = new LoanRequestSummary();
+        loanRequestSummary.setId(loanRequestId);
+        loanRequestSummary.setLoanStatus(previousStatus);
+        loanRequestSummary.setEmail("test@test.com");
+        loanRequestSummary.setFirstName("Maria");
+        loanRequestSummary.setLastName("Lopez");
+
+        loanRequestUpdateStatus.setStatus(LoanStatusEnum.CAN.name());
+
+        when(loanStatusRepository.findStatusByCode(LoanStatusEnum.CAN.name())).thenReturn(Mono.just(newStatus));
+        when(repository.findLoanRequestsById(loanRequestId)).thenReturn(Mono.just(loanRequestSummary));
+        when(repository.updateloanRequest(loanRequestId, newStatus.getId())).thenReturn(Mono.empty());
+
+        StepVerifier.create(updateLoanRequestUseCase.updateLoanStatus(loanRequestUpdateStatus, queueName))
+                .verifyComplete();
+
+        verify(repository).updateloanRequest(loanRequestId, newStatus.getId());
+        verifyNoInteractions(sqsService);
+
+    }
 }
