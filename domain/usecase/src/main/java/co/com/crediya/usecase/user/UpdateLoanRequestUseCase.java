@@ -6,6 +6,7 @@ import co.com.crediya.model.loanrequest.MessageBody;
 import co.com.crediya.model.loanrequest.enums.LoanStatusEnum;
 import co.com.crediya.model.loanrequest.gateways.*;
 import lombok.RequiredArgsConstructor;
+import lombok.Value;
 import reactor.core.publisher.Mono;
 import java.util.List;
 
@@ -17,7 +18,7 @@ public class UpdateLoanRequestUseCase {
     private final LoggerService logger;
     private final SqsService sqsService;
 
-    public Mono<Void> updateLoanStatus(LoanRequestUpdateStatus loanRequestUpdateStatus, String queueName) {
+    public Mono<Void> updateLoanStatus(LoanRequestUpdateStatus loanRequestUpdateStatus, String queueStatusUpdated, String queueLoanApprovedReports) {
         String statusCode = loanRequestUpdateStatus.getStatus();
         Long id = loanRequestUpdateStatus.getId();
 
@@ -35,7 +36,7 @@ public class UpdateLoanRequestUseCase {
                                 Mono<Void> updateMono = repository.updateloanRequest(id, loanStatus.getId());
 
                                 if (LoanStatusEnum.APROB.name().equals(statusCode) || LoanStatusEnum.RECH.name().equals(statusCode)) {
-                                    logger.info("Loan status updated to '{}', preparing to send message to {}.", statusCode, queueName);
+                                    logger.info("Loan status updated to '{}', preparing to send message to {}.", statusCode, queueStatusUpdated);
 
                                     return updateMono.then(
                                             sqsService.sendMessage(
@@ -43,12 +44,37 @@ public class UpdateLoanRequestUseCase {
                                                             String.valueOf(id),
                                                             newStatusDescription,
                                                             loanRequest.getEmail(),
-                                                            loanRequest.getFirstName() + " " + loanRequest.getLastName()
+                                                            loanRequest.getFirstName() + " " + loanRequest.getLastName(),
+                                                            loanRequestUpdateStatus.getPaymentPlan(),
+                                                            loanRequest.getAmount()
                                                     ),
-                                                    queueName
+                                                    queueStatusUpdated
                                             ).doOnSuccess(ignored ->
-                                                    logger.info("Message for loan ID {} was successfully sent to queue {}", id, queueName)
-                                            ).onErrorResume(error -> {
+                                                    logger.info("Message for loan ID {} was successfully sent to queue {}", id, queueStatusUpdated)
+                                            )
+                                            // Use Mono.defer to ensure conditional logic is executed lazily at subscription time.
+                                            // This prevents premature execution of the sendMessage call and ensures proper reactive flow.
+                                            .then( Mono.defer(() -> {
+                                                if (LoanStatusEnum.APROB.name().equals(statusCode)) {
+                                                    return sqsService.sendMessage(
+                                                                    new MessageBody(
+                                                                            String.valueOf(id),
+                                                                            LoanStatusEnum.APROB.name(),
+                                                                            loanRequest.getEmail(),
+                                                                            loanRequest.getFirstName() + " " + loanRequest.getLastName(),
+                                                                            null,
+                                                                            loanRequest.getAmount()
+                                                                    ),
+                                                                    queueLoanApprovedReports
+                                                            )
+                                                            .doOnSuccess(ignored ->
+                                                                    logger.info("Message for loan ID {} was successfully sent to secondary queue {}", id, queueLoanApprovedReports)
+                                                            );
+                                                } else {
+                                                    return Mono.empty();
+                                                }
+                                            }))
+                                            .onErrorResume(error -> {
                                                 logger.error("Error enviando mensaje a SQS, realizando rollback ", error);
                                                 return repository.updateloanRequest(id, previousStatusId)
                                                         .doOnSuccess(avoid -> logger.info("Rolled back status update for loan ID {}", id))

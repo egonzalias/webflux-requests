@@ -2,6 +2,9 @@ package co.com.crediya.model.loanrequest;
 
 import lombok.*;
 
+import java.math.BigDecimal;
+import java.util.List;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -12,4 +15,6 @@ public class MessageBody {
     private String status;
     private String email;
     private String fullName;
+    private List<PaymentSchedule> paymentPlan;
+    private BigDecimal loanAmount;
 }

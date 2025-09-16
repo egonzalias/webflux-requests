@@ -40,6 +40,7 @@ aws:
   region: "${AWS_REGION}"
   queue-loan-status-update: "${AWS_QUEUE_LOAN_STATUS}"
   queue-loan-auto-evaluation: "${AWS_QUEUE_AUTO_EVALUATION}"
+  queue-loan-approved-reports: "${AWS_QUEUE_LOAN_APPROVED_REPORTS}"
 entrypoint:
   sqs:
     region: "${AWS_REGION}"

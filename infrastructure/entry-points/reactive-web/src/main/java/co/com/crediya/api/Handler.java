@@ -42,6 +42,8 @@ public class Handler {
     private String queueLoanStatusUpdate;
     @Value("${aws.queue-loan-auto-evaluation}")
     private String queueLoanAutoEvaluation;
+    @Value("${aws.queue-loan-approved-reports}")
+    private String queueLoanApprovedReports;
 
     public Mono<ServerResponse> loanRequest(ServerRequest serverRequest) {
 
@@ -102,7 +104,7 @@ public class Handler {
                     model.setId(Long.valueOf(idLoan));
                     return  model;
                 })
-                .flatMap(model -> updateLoanRequestUseCase.updateLoanStatus(model, queueLoanStatusUpdate))
+                .flatMap(model -> updateLoanRequestUseCase.updateLoanStatus(model, queueLoanStatusUpdate, queueLoanApprovedReports))
                 .then(ServerResponse.status(HttpStatus.NO_CONTENT).build());
     }
 

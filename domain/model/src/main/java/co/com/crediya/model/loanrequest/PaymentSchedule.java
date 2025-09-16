@@ -1,4 +1,4 @@
-package co.com.crediya.sqs.listener.dto;
+package co.com.crediya.model.loanrequest;
 
 import lombok.*;
 
@@ -9,7 +9,7 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder(toBuilder = true)
-public class PaymentScheduleDTO {
+public class PaymentSchedule {
 
     private int month;
     private BigDecimal capital;

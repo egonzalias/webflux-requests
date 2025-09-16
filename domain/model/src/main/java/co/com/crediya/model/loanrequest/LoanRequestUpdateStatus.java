@@ -3,6 +3,7 @@ import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -12,4 +13,5 @@ import java.time.LocalDateTime;
 public class LoanRequestUpdateStatus {
     private Long id;
     private String status;
+    private List<PaymentSchedule> paymentPlan;
 }
