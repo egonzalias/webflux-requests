@@ -29,18 +29,19 @@ public class JwtAuthorizationFilter implements WebFilter {
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
         String authHeader = exchange.getRequest().getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
-        /*String path = exchange.getRequest().getURI().getPath();
+        String path = exchange.getRequest().getURI().getPath();
 
         List<String> publicPaths = List.of(
-                "/api/v1/login",
                 "/swagger-ui", "/swagger-ui.html", "/swagger-ui/",
-                "/v3/api-docs"
+                "/v3/api-docs",
+                "/actuator/health",
+                "/actuator/info"
         );
 
         boolean isPublic = publicPaths.stream().anyMatch(path::startsWith);
         if (isPublic) {
             return chain.filter(exchange); // no validate token
-        }*/
+        }
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             // No token provided - reject
