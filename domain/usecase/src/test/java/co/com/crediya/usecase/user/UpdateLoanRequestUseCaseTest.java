@@ -45,6 +45,7 @@ public class UpdateLoanRequestUseCaseTest {
     private final Long loanRequestId = 1L;
     private final String statusCode = LoanStatusEnum.APROB.name();
     private final String queueName = "test-queue";
+    private final String queueLoanApprovedReports = "test-queue-approved-loans";
 
     private LoanRequestUpdateStatus loanRequestUpdateStatus;
 
@@ -73,19 +74,21 @@ public class UpdateLoanRequestUseCaseTest {
         when(repository.findLoanRequestsById(loanRequestId)).thenReturn(Mono.just(loanRequestSummary));
         when(repository.updateloanRequest(loanRequestId, newStatus.getId())).thenReturn(Mono.empty());
         when(sqsService.sendMessage(any(MessageBody.class), eq(queueName))).thenReturn(Mono.empty());
+        when(sqsService.sendMessage(any(), eq(queueLoanApprovedReports))).thenReturn(Mono.empty());
 
-        StepVerifier.create(updateLoanRequestUseCase.updateLoanStatus(loanRequestUpdateStatus, queueName))
+        StepVerifier.create(updateLoanRequestUseCase.updateLoanStatus(loanRequestUpdateStatus, queueName, queueLoanApprovedReports))
                 .verifyComplete();
 
         verify(repository).updateloanRequest(loanRequestId, newStatus.getId());
         verify(sqsService).sendMessage(any(MessageBody.class), eq(queueName));
+        verify(sqsService).sendMessage(any(MessageBody.class), eq(queueLoanApprovedReports));
     }
 
     @Test
     void shouldThrowExceptionWhenStatusCodeNotFound() {
         when(loanStatusRepository.findStatusByCode(statusCode)).thenReturn(Mono.empty());
 
-        StepVerifier.create(updateLoanRequestUseCase.updateLoanStatus(loanRequestUpdateStatus, queueName))
+        StepVerifier.create(updateLoanRequestUseCase.updateLoanStatus(loanRequestUpdateStatus, queueName, queueLoanApprovedReports))
                 .expectErrorSatisfies(error -> {
                     assertTrue(error instanceof ValidationException);
                     ValidationException ve = (ValidationException) error;
@@ -105,7 +108,7 @@ public class UpdateLoanRequestUseCaseTest {
         when(loanStatusRepository.findStatusByCode(statusCode)).thenReturn(Mono.just(newStatus));
         when(repository.findLoanRequestsById(loanRequestId)).thenReturn(Mono.empty());
 
-        StepVerifier.create(updateLoanRequestUseCase.updateLoanStatus(loanRequestUpdateStatus, queueName))
+        StepVerifier.create(updateLoanRequestUseCase.updateLoanStatus(loanRequestUpdateStatus, queueName, queueLoanApprovedReports))
                 .expectErrorSatisfies(error -> {
                     assertTrue(error instanceof ValidationException);
                     ValidationException ve = (ValidationException) error;
@@ -136,7 +139,7 @@ public class UpdateLoanRequestUseCaseTest {
         when(sqsService.sendMessage(any(), eq(queueName))).thenReturn(Mono.error(new RuntimeException("SQS error")));
         when(repository.updateloanRequest(loanRequestId, previousStatus.getId())).thenReturn(Mono.empty());
 
-        StepVerifier.create(updateLoanRequestUseCase.updateLoanStatus(loanRequestUpdateStatus, queueName))
+        StepVerifier.create(updateLoanRequestUseCase.updateLoanStatus(loanRequestUpdateStatus, queueName, queueLoanApprovedReports))
                 .expectErrorSatisfies(error -> {
                     assertTrue(error instanceof ValidationException);
                     ValidationException ve = (ValidationException) error;
@@ -165,8 +168,9 @@ public class UpdateLoanRequestUseCaseTest {
         when(repository.findLoanRequestsById(loanRequestId)).thenReturn(Mono.just(loanRequestSummary));
         when(repository.updateloanRequest(any(), any())).thenReturn(Mono.empty());
         when(sqsService.sendMessage(any(), eq(queueName))).thenReturn(Mono.empty());
+        when(sqsService.sendMessage(any(), eq(queueLoanApprovedReports))).thenReturn(Mono.empty());
 
-        StepVerifier.create(updateLoanRequestUseCase.updateLoanStatus(loanRequestUpdateStatus, queueName))
+        StepVerifier.create(updateLoanRequestUseCase.updateLoanStatus(loanRequestUpdateStatus, queueName, queueLoanApprovedReports))
                 .verifyComplete();
 
         verify(sqsService).sendMessage(messageCaptor.capture(), eq(queueName));
@@ -196,7 +200,7 @@ public class UpdateLoanRequestUseCaseTest {
         when(repository.findLoanRequestsById(loanRequestId)).thenReturn(Mono.just(loanRequestSummary));
         when(repository.updateloanRequest(loanRequestId, newStatus.getId())).thenReturn(Mono.empty());
 
-        StepVerifier.create(updateLoanRequestUseCase.updateLoanStatus(loanRequestUpdateStatus, queueName))
+        StepVerifier.create(updateLoanRequestUseCase.updateLoanStatus(loanRequestUpdateStatus, queueName, queueLoanApprovedReports))
                 .verifyComplete();
 
         verify(repository).updateloanRequest(loanRequestId, newStatus.getId());

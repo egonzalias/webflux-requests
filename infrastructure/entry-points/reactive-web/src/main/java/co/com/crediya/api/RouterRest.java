@@ -17,5 +17,4 @@ public class RouterRest {
                 .PATCH("/api/v1/solicitud/{id}/estado", handler::updateLoanStatus)
                 .build();
     }
-
 }
