@@ -8,7 +8,7 @@ dependencies {
     implementation 'org.hibernate.validator:hibernate-validator:8.0.1.Final'
     implementation "org.mapstruct:mapstruct:$mapStructVersion"
     implementation 'com.fasterxml.jackson.core:jackson-databind'
-    implementation 'org.springdoc:springdoc-openapi-starter-webflux-ui:2.5.0'
+    implementation 'org.springdoc:springdoc-openapi-starter-webflux-ui:2.8.11'
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
     runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
